@@ -54,27 +54,6 @@ function skipQuoted(source: string, start: number, quote: string): number {
   return j;
 }
 
-function skipTemplateExpression(source: string, start: number): number {
-  let depth = 1;
-  let j = start + 2;
-  while (j < source.length && depth > 0) {
-    if (source[j] === '{') depth++;
-    else if (source[j] === '}') depth--;
-    j++;
-  }
-  return j;
-}
-
-function skipTemplate(source: string, start: number): number {
-  let j = start + 1;
-  while (j < source.length && source[j] !== '`') {
-    if (source[j] === '\\') j += 2;
-    else if (source[j] === '$' && source[j + 1] === '{') j = skipTemplateExpression(source, j);
-    else j++;
-  }
-  return j;
-}
-
 function skipComment(source: string, start: number, opener: string): number {
   const isLine = opener === '//';
   const close = isLine ? source.indexOf('\n', start) : source.indexOf('*/', start + 2);
@@ -83,24 +62,68 @@ function skipComment(source: string, start: number, opener: string): number {
 }
 
 // Same-length copy: comments and string contents become spaces so indices line up with the original.
+// Template literals keep their ${…} expressions as code; only the literal parts are blanked.
 function stripCommentsAndStrings(source: string): string {
   const chars = source.split('');
-  let i = 0;
+  maskCode(source, chars, 0, false);
+  return chars.join('');
+}
+
+// Returns the index of the `}` that closes a template expression, or source.length at top level.
+function maskCode(source: string, chars: string[], start: number, insideTemplate: boolean): number {
+  let depth = 0;
+  let i = start;
   while (i < source.length) {
-    const pair = source.slice(i, i + 2);
-    if (pair === '//' || pair === '/*') {
-      const end = skipComment(source, i, pair);
-      blank(chars, i, end);
-      i = end;
-    } else if (source[i] === "'" || source[i] === '"' || source[i] === '`') {
-      const end = source[i] === '`' ? skipTemplate(source, i) : skipQuoted(source, i, source[i] ?? '');
-      blank(chars, i + 1, end);
-      i = end + 1;
+    const afterLiteral = maskLiteralAt(source, chars, i);
+    if (afterLiteral !== null) {
+      i = afterLiteral;
+      continue;
+    }
+    const char = source[i];
+    if (char === '}' && insideTemplate && depth === 0) return i;
+    if (char === '{') depth++;
+    else if (char === '}') depth--;
+    i++;
+  }
+  return i;
+}
+
+// Blanks the comment, string or template that starts at i and returns the index after it; null for plain code.
+function maskLiteralAt(source: string, chars: string[], i: number): number | null {
+  const pair = source.slice(i, i + 2);
+  if (pair === '//' || pair === '/*') {
+    const end = skipComment(source, i, pair);
+    blank(chars, i, end);
+    return end;
+  }
+  const char = source[i] ?? '';
+  if (char === "'" || char === '"') {
+    const end = skipQuoted(source, i, char);
+    blank(chars, i + 1, end);
+    return end + 1;
+  }
+  if (char === '`') return maskTemplate(source, chars, i) + 1;
+  return null;
+}
+
+// Returns the index of the closing backtick (or source.length when unterminated).
+function maskTemplate(source: string, chars: string[], start: number): number {
+  let literalStart = start + 1;
+  let j = literalStart;
+  while (j < source.length && source[j] !== '`') {
+    if (source[j] === '\\') {
+      j += 2;
+    } else if (source[j] === '$' && source[j + 1] === '{') {
+      blank(chars, literalStart, j);
+      j = maskCode(source, chars, j + 2, true) + 1;
+      literalStart = j;
     } else {
-      i++;
+      j++;
     }
   }
-  return chars.join('');
+  const end = Math.min(j, source.length);
+  blank(chars, literalStart, end);
+  return end;
 }
 
 function importsOf(source: string): ImportRef[] {
@@ -209,7 +232,7 @@ describe('architecture scanner', () => {
     ]);
   });
 
-  test('stripCommentsAndStrings keeps code identifiers only', () => {
+  test('stripCommentsAndStrings keeps code identifiers only, including template expressions', () => {
     // biome-ignore lint/suspicious/noTemplateCurlyInString: the sample source deliberately contains a template literal
     const source = "const a = 'window'; // document\n/* navigator */ const b = performance; const c = `x${location}`;";
     expect(stripCommentsAndStrings(source).match(/\b[A-Za-z_]\w*\b/g)).toEqual([
@@ -220,6 +243,24 @@ describe('architecture scanner', () => {
       'performance',
       'const',
       'c',
+      'location',
+    ]);
+  });
+
+  test('stripCommentsAndStrings exposes forbidden globals in template expressions, nested templates and braces', () => {
+    const source = [
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the sample source deliberately contains template literals
+      'const id = `run-${Date.now()}`;',
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the sample source deliberately contains template literals
+      'const n = `a${f({ k: `b${Math.random()}` })}c`;',
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the sample source deliberately contains template literals
+      "const s = `window ${'document'} navigator ${{ performance: 1 }.performance}`;",
+    ].join('\n');
+    expect(stripCommentsAndStrings(source).match(FORBIDDEN_GLOBALS)).toEqual([
+      'Date.now',
+      'Math.random',
+      'performance',
+      'performance',
     ]);
   });
 });

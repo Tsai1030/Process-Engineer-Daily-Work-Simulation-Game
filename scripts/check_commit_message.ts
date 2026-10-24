@@ -9,8 +9,15 @@ function findAiToolWord(text: string): string | undefined {
   return AI_TOOL_WORDS.find((word) => lowered.includes(word));
 }
 
+// `git commit -v` appends the diff below this line; git itself drops everything from it onward.
+const SCISSORS_LINE = '# ------------------------ >8 ------------------------';
+
 export function checkCommitMessage(message: string): string | null {
-  const lines = message.split('\n').filter((line) => !line.startsWith('#'));
+  const allLines = message.split(/\r?\n/);
+  const scissorsIndex = allLines.indexOf(SCISSORS_LINE);
+  const lines = (scissorsIndex < 0 ? allLines : allLines.slice(0, scissorsIndex)).filter(
+    (line) => !line.startsWith('#'),
+  );
   const header = lines[0] ?? '';
   if (header.startsWith('Merge ')) return null;
   if (!HEADER_PATTERN.test(header)) {

@@ -8,6 +8,16 @@ const ACCEPTED: string[] = [
   'docs: explain the CLAUDE.md rules for contributors',
   "Merge branch 'main' into stage1",
   'fix(save): reject saves whose checksum does not match\n\nTruncated writes were loading as half-empty states.',
+  'fix(save): reject saves whose checksum does not match\r\n\r\nTruncated writes were loading as half-empty states.\r\n',
+  [
+    'feat(ui): add the hud',
+    '',
+    '# Please enter the commit message for your changes.',
+    '# ------------------------ >8 ------------------------',
+    '# Do not modify or remove the line above.',
+    'diff --git a/CLAUDE.md b/CLAUDE.md',
+    '+Ask claude before editing anthropic examples.',
+  ].join('\n'),
 ];
 const header = (line: string): string =>
   `commit message rejected: header does not match Conventional Commits: "${line}"`;
@@ -22,6 +32,14 @@ const REJECTED: [string, string][] = [
   ],
   ['feat(core): port the evaluator suggested by ChatGPT', 'commit message rejected: mentions an AI tool: word=chatgpt'],
   ['chore: tidy gemini settings', 'commit message rejected: mentions an AI tool: word=gemini'],
+  [
+    'feat(core): add rng\r\n\r\nCo-Authored-By: Claude <noreply@anthropic.com>\r\n',
+    'commit message rejected: AI co-author trailer: line="Co-Authored-By: Claude <noreply@anthropic.com>"',
+  ],
+  [
+    'feat(core): add rng\n\nThanks to claude.\n# ------------------------ >8 ------------------------\ndiff',
+    'commit message rejected: mentions an AI tool: word=claude',
+  ],
 ];
 
 describe('checkCommitMessage', () => {
