@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:ec.ltn.com.tw)",
+      "Bash(mkdir -p /d/game2/design && which node bun)",
+      "Bash(mkdir -p /d/game2/design)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Bash(mkdir -p /d/game2/design && which node bun 2>&1 | head)"
+    ],
+    "additionalDirectories": ["D:\\game2", "D:\\game2\\design"]
+  }
+}
