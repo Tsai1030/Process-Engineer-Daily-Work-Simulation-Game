@@ -1,4 +1,10 @@
 /* src/ui/styles/comic.css — 風格 C 的 HUD 與狀態面板（範例 design/style-c-toon.html L32-66、L116-131） */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
