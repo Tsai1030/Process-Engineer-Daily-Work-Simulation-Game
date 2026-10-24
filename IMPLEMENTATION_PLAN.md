@@ -74,7 +74,7 @@
 
 - 2026-10-24 TypeScript：`bun install` 解析到 `typescript@7.0.2`，`tsc --version` 為 7.0.2，`bun run typecheck` 0 錯誤，不觸發退路規則（a）～（d），維持 7.0.2。
 - 2026-10-24 Biome：2.5.15 接受 01 §14.4 的 `biome.json`，沒有設定錯誤；只有 info 層級提示（`linter.rules.recommended` 已棄用、建議改 `preset`），不阻擋，設定維持原文。
-- 2026-10-24 紅燈示範（打包檢查擋下除錯面板）：`dist check failed: dev panel marker found: file=assets/index-BWauGa4t.js`。單寫 `import './app/dev_panel';` 會被 tree-shaking 移除標記而不失敗，所以示範改成 `import { DEV_PANEL_MARKER }` 並實際使用它；示範後已還原。
+- 2026-10-24 紅燈示範（打包檢查擋下除錯面板）：規則是標記必須被面板一定會執行的程式碼引用（dev_panel.ts 模組層級副作用 `document.documentElement.dataset['devPanel'] = DEV_PANEL_MARKER`），否則 tree-shaking 會移除它而檢查漏報。照原文只加 `import './app/dev_panel';` 後 `bun run build` 輸出：`dist check failed: dev panel marker found: file=assets/index-CShtIfB2.js`；移除該行後回到 PASS。
 - 2026-10-24 `scripts/check_dist.ts` 在 Windows 上把 `Bun.Glob` 回傳的反斜線路徑轉成 `/`，訊息才與計畫的 `assets/….js` 格式一致。
 
 ## 驗證器規則的 stage 分配（01 D81）
