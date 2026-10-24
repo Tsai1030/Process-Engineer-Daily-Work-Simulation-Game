@@ -1,3 +1,4 @@
+import { Texture } from 'three';
 import { createNewGame } from '../src/core/new_game';
 import type {
   CharacterAppearance,
@@ -23,6 +24,7 @@ import type {
   StatRule,
   TextId,
 } from '../src/model';
+import type { CanvasTextureFactory } from '../src/render/canvas_textures';
 
 export const TEST_SEED = 1;
 
@@ -750,4 +752,23 @@ export function defined<T>(value: T | undefined, label: string): T {
 /** 只覆寫最上層欄位的內容副本 */
 export function contentWith(patch: Partial<ContentBundle>): ContentBundle {
   return { ...testContent, ...patch };
+}
+
+export function createFakeTextureFactory(): CanvasTextureFactory & { readonly created: readonly Texture[] } {
+  const created: Texture[] = [];
+  const make = (name: string): Texture => {
+    const texture = new Texture();
+    texture.name = name;
+    created.push(texture);
+    return texture;
+  };
+  return {
+    created,
+    floor: () => make('floor'),
+    wall: () => make('wall'),
+    hazard: () => make('hazard'),
+    photoSign: () => make('photoSign'),
+    screen: (label, status, inverted) => make(`screen:${label}:${status}:${inverted}`),
+    sign: (label) => make(`sign:${label}`),
+  };
 }
