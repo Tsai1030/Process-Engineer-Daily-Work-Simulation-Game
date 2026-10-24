@@ -76,6 +76,8 @@
 - 2026-10-24 Biome：2.5.15 接受 01 §14.4 的 `biome.json`，沒有設定錯誤；只有 info 層級提示（`linter.rules.recommended` 已棄用、建議改 `preset`），不阻擋，設定維持原文。
 - 2026-10-24 紅燈示範（打包檢查擋下除錯面板）：規則是標記必須被面板一定會執行的程式碼引用（dev_panel.ts 模組層級副作用 `document.documentElement.dataset['devPanel'] = DEV_PANEL_MARKER`），否則 tree-shaking 會移除它而檢查漏報。照原文只加 `import './app/dev_panel';` 後 `bun run build` 輸出：`dist check failed: dev panel marker found: file=assets/index-CShtIfB2.js`；移除該行後回到 PASS。
 - 2026-10-24 `scripts/check_dist.ts` 在 Windows 上把 `Bun.Glob` 回傳的反斜線路徑轉成 `/`，訊息才與計畫的 `assets/….js` 格式一致。
+- 2026-10-25 紅燈示範（分層 import 規則）：暫時加入 `src/core/arch_probe.ts`（`import { Vector3 } from 'three';`）後 `bun test test/architecture.test.ts` 輸出 `"detail": "core may not import package three", "file": "src/core/arch_probe.ts"`（`every import respects the layer rules of spec 01 section 4.2` FAIL），`bun run check` 的 `lint/style/noRestrictedImports` 同時報同一行；刪除該檔後 19 個測試全數 PASS。
+- 2026-10-25 `test/architecture.test.ts` 的 `stripCommentsAndStrings` 回傳與原文等長的字串（註解與字串內容換成空白、換行保留），讓 `importsOf` 能用遮罩後的位置回原文取 import 目標、行號也不位移。
 
 ## 驗證器規則的 stage 分配（01 D81）
 
