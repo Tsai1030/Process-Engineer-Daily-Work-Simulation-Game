@@ -375,3 +375,7 @@ body {
     transition: none !important;
   }
 }
+
+.wind-flag[hidden] {
+  display: none;
+}

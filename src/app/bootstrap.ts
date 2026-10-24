@@ -3,8 +3,12 @@ import '../ui/styles/comic.css';
 import { content } from '../content';
 import { validateContent } from '../core/content_validator';
 import { createNewGame } from '../core/new_game';
-import type { PlayerProfile, SceneSnapshot } from '../model';
+import type { GameState, PlayerProfile, SceneSnapshot } from '../model';
 import { createRenderHost, type RenderHost } from '../render/render_host';
+import { createHud } from '../ui/components/hud';
+import { createStatsPanel } from '../ui/components/stats_panel';
+import { h } from '../ui/dom';
+import { hudView, statsPanelView } from '../ui/view_models';
 import { ContentError, InvariantError } from '../utils/errors';
 import { createConsoleLogger } from '../utils/logger';
 import { toSceneSnapshot } from './flow_controller';
@@ -42,6 +46,16 @@ function startRenderLoop(win: Window, render: RenderHost): void {
   win.requestAnimationFrame(frame);
 }
 
+function mountUi(doc: Document, state: GameState): void {
+  const root = doc.getElementById('ui');
+  if (root === null) throw new InvariantError('UI mount failed: #ui element is missing');
+  const hud = createHud();
+  const stats = createStatsPanel();
+  hud.update(hudView(state, content));
+  stats.update(statsPanelView(state, content));
+  root.append(h('div', { class: 'top' }, hud.el, stats.el));
+}
+
 export async function bootstrap(doc: Document): Promise<void> {
   const win = doc.defaultView;
   if (win === null) throw new Error('bootstrap failed: document has no window');
@@ -67,6 +81,7 @@ export async function bootstrap(doc: Document): Promise<void> {
   const render = createRenderHost(doc, { logger, quality: 'auto' });
   render.setMotion({ reduced: win.matchMedia('(prefers-reduced-motion: reduce)').matches });
   await render.apply(withCalibration(toSceneSnapshot(state, content), calibration));
+  if (calibration?.hideUi !== true) mountUi(doc, state);
   logger.info(`bootstrap ready: render=${render.mode} seed=${seed} calibration=${calibration !== null}`);
   startRenderLoop(win, render);
 }
