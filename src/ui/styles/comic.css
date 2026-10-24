@@ -215,7 +215,7 @@ body {
 }
 
 .row.low .lab::after {
-  content: "危";
+  content: attr(data-low-label);
   margin-left: 3px;
   font-size: var(--fs-min);
   background: var(--red);

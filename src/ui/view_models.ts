@@ -54,6 +54,8 @@ export interface StatRowView {
 export interface StatsPanelView {
   title: string;
   ariaLabel: string;
+  /** 低於門檻的文字標籤（不只靠顏色，04 §9.6） */
+  lowBadge: string;
   rows: readonly StatRowView[];
   favor: { label: string; count: number; slots: number };
   money: { label: string; text: string };
@@ -100,6 +102,7 @@ export function statsPanelView(state: DeepReadonly<GameState>, content: ContentB
   return {
     title: text('t.ui.stats.title'),
     ariaLabel: text('t.ui.stats.aria'),
+    lowBadge: text('t.ui.stats.low_badge'),
     rows,
     favor: {
       label: text('t.ui.stat.favor'),

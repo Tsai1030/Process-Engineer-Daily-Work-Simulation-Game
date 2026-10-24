@@ -1862,7 +1862,7 @@ WebGL 不可用時（01 §9.7 L4），每個場景改成 CSS 組成的漫畫格�
 
 ### 9.7 數值面板（`components/stats_panel.ts`）
 
-**展開**（範例 `.stats`）：紅標題貼紙「新人狀態表」；體力（`/selectors.maxStamina`）、精神、專業、主管好感：名稱＋數值條＋數字；同事人情：5 枚硬幣＋數字；存款：虛線上緣、`NT$ 48,200`。低於 `lowLine`（35）→ `.low`：紅斜紋條＋「危」。
+**展開**（範例 `.stats`）：紅標題貼紙「新人狀態表」；體力（`/selectors.maxStamina`）、精神、專業、主管好感：名稱＋數值條＋數字；同事人情：5 枚硬幣＋數字；存款：虛線上緣、`NT$ 48,200`。數值 ≤ `lowLine`（35，與範例 `n <= LOW_LINE` 一致）→ `.low`：紅斜紋條＋「危」標籤。「危」是內容台詞 `t.ui.stats.low_badge`（不寫死在 CSS），由 `StatsPanelView.lowBadge` 帶進元件，寫到 `.lab` 的 `data-low-label`，CSS 以 `content: attr(data-low-label)` 顯示；低狀態因此同時有文字與斜紋，不只靠顏色。
 
 ```text
 桌機（右上，310px）                      手機：收合列（對話、選擇、小遊戲時自動收合）

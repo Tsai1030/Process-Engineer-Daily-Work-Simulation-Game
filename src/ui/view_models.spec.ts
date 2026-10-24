@@ -99,10 +99,11 @@ describe('statsPanelView', () => {
     ]);
   });
 
-  test('favor coins and money come from the stat rules and formatter', () => {
+  test('titles, the low badge, favor coins and money come from content texts, stat rules and formatter', () => {
     expect(statsPanelView(buildTestState(), testContent)).toMatchObject({
       title: '新人狀態表',
       ariaLabel: '角色數值',
+      lowBadge: '危',
       favor: { label: '同事人情', count: 3, slots: 5 },
       money: { label: '存款', text: 'NT$ 60,000' },
     });

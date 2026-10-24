@@ -16,8 +16,9 @@ function createStatRow(view: StatRowView) {
   );
   return {
     el,
-    update(next: StatRowView) {
+    update(next: StatRowView, lowBadge: string) {
       label.textContent = next.label;
+      label.dataset['lowLabel'] = lowBadge;
       fill.style.width = `${next.value}%`;
       lostCap.style.width = `${next.lostCapPct}%`;
       value.textContent = String(next.value);
@@ -73,7 +74,7 @@ export function createStatsPanel(): Component<StatsPanelView> {
         statGrid.replaceChildren(...rows.map((row) => row.el), favorRow.el, moneyRow);
       }
       view.rows.forEach((row, index) => {
-        rows[index]?.update(row);
+        rows[index]?.update(row, view.lowBadge);
       });
       favorRow.update(view.favor);
       moneyLabel.textContent = view.money.label;

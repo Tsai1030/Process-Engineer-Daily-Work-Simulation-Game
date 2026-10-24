@@ -198,6 +198,7 @@ const TEXT: Record<TextId, string> = {
   't.ui.hud.wind_flag': '風向期',
   't.ui.stats.title': '新人狀態表',
   't.ui.stats.aria': '角色數值',
+  't.ui.stats.low_badge': '危',
   't.sys.pronoun.he': '他',
   't.sys.pronoun.she': '她',
   't.sys.pronoun.neutral': 'TA',
