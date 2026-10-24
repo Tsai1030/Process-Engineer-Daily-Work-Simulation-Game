@@ -256,6 +256,15 @@ describe('applyEffects other ops', () => {
     );
   });
 
+  test('affinity on a character without a relationship record fails fast', () => {
+    const state = stateWith((s) => {
+      delete s.relationships['chr.meiling'];
+    });
+    expect(() => run(state, [{ op: 'affinity', character: 'chr.meiling', delta: 5 }])).toThrow(
+      new InvariantError('Unknown character: character=chr.meiling'),
+    );
+  });
+
   test('counters clamp only wip pressure and the exercise bonus', () => {
     const state = buildTestState({ counters: { 'cnt.wip_pressure': 95, 'cnt.sys_exercise_bonus': 9 } });
     const { counters } = run(state, [
@@ -335,6 +344,20 @@ describe('applyEffects other ops', () => {
     });
   });
 
+  // 宿舍第 1 個月房租 0 元（fixtures rent.dorm）：帳本寫 +0，金錢不變
+  test('moving into the zero-rent dorm logs a +0 rent line and no money delta', () => {
+    const state = buildTestState({ stats: { money: 60000 } });
+    state.economy.housing = 'sharedRoom';
+    const moved = run(state, [{ op: 'economy', housing: 'dorm' }]);
+    const rentLine = moved.state.economy.monthLedger[0];
+    expect({
+      deltas: moved.result.deltas,
+      money: moved.state.stats.money,
+      ledgerLength: moved.state.economy.monthLedger.length,
+      amountIsPositiveZero: rentLine !== undefined && Object.is(rentLine.amount, 0),
+    }).toEqual({ deltas: [], money: 60000, ledgerLength: 1, amountIsPositiveZero: true });
+  });
+
   test('economy writes commute and filial amount directly', () => {
     const { economy } = run(buildTestState(), [{ op: 'economy', filialAmount: 20000, commute: 'scooter' }]).state;
     expect(economy).toEqual({ ...buildTestState().economy, filialAmount: 20000, commute: 'scooter' });
@@ -382,19 +405,27 @@ describe('applyEffects other ops', () => {
     });
   });
 
-  test('applyEffects only changes the draft it is given', () => {
-    const state = buildTestState();
-    const snapshot = structuredClone(state);
-    const draft = structuredClone(state);
-    applyEffects(draft, [{ op: 'stat', stat: 'mind', delta: -5 }], {
-      content: testContent,
-      rng: createRng(TEST_SEED),
-      sourceEvent: null,
-    });
-    expect({ input: state, draftMind: draft.stats.mind }).toEqual({
-      input: snapshot,
-      draftMind: snapshot.stats.mind - 5,
-    });
+  test('applyEffects copies modifier and phone payloads instead of aliasing them, and changes the draft stat', () => {
+    const modifier: ModifierDef = {
+      id: 'mod.test_alias',
+      kind: 'statGain',
+      stat: 'mind',
+      positiveMultiplier: 2,
+      negativeMultiplier: 1,
+      durationDays: null,
+    };
+    const startMind = buildTestState().stats.mind;
+    const { result, state } = run(buildTestState(), [
+      { op: 'modifier', modifier },
+      { op: 'phone', thread: 'thread.test', message: { from: 'chr.azhe', text: 't.ev.test_seeded.msg', kind: 'chat' } },
+      { op: 'stat', stat: 'mind', delta: -5 },
+    ]);
+    const announced = result.domainEvents[0];
+    expect({
+      modifierIsContentObject: state.modifiers[0] === modifier,
+      announcedIsStoredMessage: announced?.type === 'phoneMessage' && announced.message === state.phone.messages[0],
+      draftMind: state.stats.mind,
+    }).toEqual({ modifierIsContentObject: false, announcedIsStoredMessage: false, draftMind: startMind - 5 });
   });
 });
 
@@ -409,7 +440,7 @@ describe('applyEffects stage 2 ops', () => {
     { op: 'advanceTime', minutes: 10 },
   ] as const)('%p fails fast until its Stage 2 module exists', (effect) => {
     expect(() => run(buildTestState(), [effect])).toThrow(
-      `Effect op not implemented until Stage 2: op=${effect.op} source=none`,
+      new InvariantError(`Effect op not implemented until Stage 2: op=${effect.op} source=none`),
     );
   });
 });

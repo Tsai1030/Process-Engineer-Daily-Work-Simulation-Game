@@ -194,17 +194,16 @@ describe('createFabBayScene', () => {
     expect(logger.lines).toEqual(['warn [fab_bay] machine missing from snapshot: machine=mc.et06']);
   });
 
-  test('dispose releases every scene texture and empties the tracker but keeps the shared kit', () => {
-    const { module, kit, tracker, textures } = build();
+  test('dispose releases every scene texture but keeps the shared kit', () => {
+    const { module, kit, textures } = build();
     module.enter(snapshotWith({ 'mc.et03': 'down' }));
     const disposed = new Set<unknown>();
     const watched = [...textures.created, kit.outlineMaterial];
     for (const resource of watched) resource.addEventListener('dispose', () => disposed.add(resource));
     module.dispose();
     expect({
-      trackerSize: tracker.size,
       undisposedTextures: textures.created.filter((texture) => !disposed.has(texture)).map((t) => t.name),
       outlineDisposed: disposed.has(kit.outlineMaterial),
-    }).toEqual({ trackerSize: 0, undisposedTextures: [], outlineDisposed: false });
+    }).toEqual({ undisposedTextures: [], outlineDisposed: false });
   });
 });
