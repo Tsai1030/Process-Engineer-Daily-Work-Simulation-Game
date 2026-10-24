@@ -17,8 +17,7 @@ import { round1 } from '../utils/math';
 
 const CHAPTER_ORDER: readonly string[] = ['prologue', 'ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'finale'];
 const SATURDAY = 5;
-const ON_CALL_WEEK_DAYS_BEFORE_SATURDAY = 5;
-const ON_CALL_WEEK_DAYS_AFTER_SATURDAY = 1;
+const DAYS_PER_WEEK = 7;
 
 export function maxStamina(state: DeepReadonly<GameState>, content: ContentBundle): number {
   const rules = content.balance.stamina;
@@ -92,13 +91,11 @@ function isAtOrAfterChapter3(chapter: ChapterId): boolean {
   return CHAPTER_ORDER.indexOf(chapter) >= CHAPTER_ORDER.indexOf('ch3');
 }
 
+// 週一～週日的週；用本週六自己的月份算它是第幾個星期六
 function isInRotationWeek(today: number, rotationSaturday: number): boolean {
-  const monthPrefix = dayIndexToIso(today).slice(0, 7);
-  const firstOfMonth = isoToDayIndex(`${monthPrefix}-01` as IsoDate);
-  let firstSaturday = firstOfMonth;
-  while (weekdayOf(firstSaturday) !== SATURDAY) firstSaturday += 1;
-  const saturday = firstSaturday + 7 * (rotationSaturday - 1);
-  return today >= saturday - ON_CALL_WEEK_DAYS_BEFORE_SATURDAY && today <= saturday + ON_CALL_WEEK_DAYS_AFTER_SATURDAY;
+  const saturday = today - weekdayOf(today) + SATURDAY;
+  const saturdayDayOfMonth = Number(dayIndexToIso(saturday).slice(8));
+  return Math.floor((saturdayDayOfMonth - 1) / DAYS_PER_WEEK) + 1 === rotationSaturday;
 }
 
 // D79

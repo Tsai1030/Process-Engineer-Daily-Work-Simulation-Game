@@ -1,23 +1,20 @@
-import {
-  type CharacterId,
-  type ContentBundle,
-  type CounterId,
-  type FlagId,
-  type GameState,
-  HIDDEN_STAT_IDS,
-  type MachineId,
-  type MachineState,
-  type PlayerProfile,
-  type RelationshipState,
-  type StatId,
-  type Stats,
-  VISIBLE_STAT_IDS,
+import type {
+  CharacterId,
+  ContentBundle,
+  CounterId,
+  FlagId,
+  GameState,
+  MachineId,
+  MachineState,
+  PlayerProfile,
+  RelationshipState,
+  StatId,
+  Stats,
 } from '../model';
 import { clockToMinutes, isoToDayIndex } from '../utils/date';
 import { InvariantError } from '../utils/errors';
 
 const MAX_SEED = 4294967295;
-const STAT_IDS: readonly StatId[] = [...VISIBLE_STAT_IDS, ...HIDDEN_STAT_IDS];
 
 export function createNewGame(profile: PlayerProfile, content: ContentBundle, seed: number): GameState {
   if (!Number.isInteger(seed) || seed < 0 || seed > MAX_SEED) {
@@ -32,10 +29,24 @@ export function createNewGame(profile: PlayerProfile, content: ContentBundle, se
     throw new InvariantError('Campaign has no chapters');
   }
 
-  const stats = {} as Stats;
-  for (const stat of STAT_IDS) {
-    stats[stat] = resume.initialStats[stat] ?? content.stats[stat].initial;
-  }
+  const initial = (stat: StatId): number => resume.initialStats[stat] ?? content.stats[stat].initial;
+  const stats: Stats = {
+    stamina: initial('stamina'),
+    mind: initial('mind'),
+    skill: initial('skill'),
+    bossFavor: initial('bossFavor'),
+    favor: initial('favor'),
+    money: initial('money'),
+    healthDebt: initial('healthDebt'),
+    blame: initial('blame'),
+    scheming: initial('scheming'),
+    conscience: initial('conscience'),
+    lifeSatisfaction: initial('lifeSatisfaction'),
+    network: initial('network'),
+    visibility: initial('visibility'),
+    goldenHandcuffs: initial('goldenHandcuffs'),
+    evidence: initial('evidence'),
+  };
 
   const relationships: Record<CharacterId, RelationshipState> = {};
   for (const character of Object.values(content.characters)) {
@@ -62,14 +73,15 @@ export function createNewGame(profile: PlayerProfile, content: ContentBundle, se
 
   const startKeyDay = Object.values(content.keyDays).find((keyDay) => keyDay.date === content.campaign.startDate);
   const rank = content.ranks.Q1;
+  const startDay = isoToDayIndex(content.campaign.startDate);
 
   return {
     runId: `run-${seed}`,
     seed,
     rngState: seed,
-    player: profile,
+    player: { ...profile },
     time: {
-      dayIndex: isoToDayIndex(content.campaign.startDate),
+      dayIndex: startDay,
       minuteOfDay: clockToMinutes(content.balance.sleep.wakeAt),
       chapter: firstChapter.id,
       keyDaysPlayed: 0,
@@ -96,7 +108,7 @@ export function createNewGame(profile: PlayerProfile, content: ContentBundle, se
     // 02 §7.6：通勤與孝親金的預設
     economy: {
       housing: 'dorm',
-      housingSinceDay: 0,
+      housingSinceDay: startDay,
       commute: 'shuttle',
       filialAmount: 10000,
       monthLedger: [],

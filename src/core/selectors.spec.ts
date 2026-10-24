@@ -168,6 +168,25 @@ describe('onCallTonight', () => {
     expect(onCallTonight(state, testContent)).toBe(expected);
   });
 
+  // rotationSaturday 1，週一～週日的週，用「本週六」所在的月份算第幾個星期六：
+  // 2027-03-29（一）那週的週六是 2027-04-03，四月 1 日是週四 → 4/3 是四月第 1 個星期六 → 在值班週
+  // 2027-04-04（日）同一週 → 在值班週
+  // 2027-03-28（日）那週的週六是 2027-03-27 → 三月第 4 個星期六 → 不在值班週
+  test.each([
+    ['2027-03-29', true],
+    ['2027-04-04', true],
+    ['2027-03-28', false],
+  ] as const)('rotation week uses its own Saturday month: %s → %p', (iso, expected) => {
+    const content = contentWith({
+      balance: { ...testContent.balance, onCall: { ...testContent.balance.onCall, rotationSaturday: 1 } },
+    });
+    const state = stateWith((s) => {
+      s.time.chapter = 'ch3';
+      s.time.dayIndex = isoToDayIndex(iso);
+    });
+    expect(onCallTonight(state, content)).toBe(expected);
+  });
+
   test('key day flagged onCall is on call in the prologue', () => {
     const content = contentWith({
       keyDays: {

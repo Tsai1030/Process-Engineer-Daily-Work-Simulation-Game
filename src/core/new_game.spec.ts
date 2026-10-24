@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { TEST_SEED, testContent } from '../../test/fixtures';
+import { contentWith, TEST_SEED, testContent } from '../../test/fixtures';
 import type { ChoiceType, GameState, PlayerProfile } from '../model';
 import { InvariantError } from '../utils/errors';
 import { createNewGame } from './new_game';
@@ -112,6 +112,18 @@ describe('createNewGame', () => {
   test('the opening state survives a JSON round trip unchanged', () => {
     const state = createNewGame(PROFILE, testContent, TEST_SEED);
     expect(JSON.parse(JSON.stringify(state))).toEqual(state);
+  });
+  test('the player profile is copied, not shared with the caller', () => {
+    expect(createNewGame(PROFILE, testContent, TEST_SEED).player === PROFILE).toBe(false);
+  });
+  // 2027-03-08 是 2027-03-01（dayIndex 0）之後 7 天
+  test('a campaign starting 2027-03-08 starts the clock and the housing tenure on day 7', () => {
+    const content = contentWith({ campaign: { ...testContent.campaign, startDate: '2027-03-08' } });
+    const state = createNewGame(PROFILE, content, TEST_SEED);
+    expect({ dayIndex: state.time.dayIndex, housingSinceDay: state.economy.housingSinceDay }).toEqual({
+      dayIndex: 7,
+      housingSinceDay: 7,
+    });
   });
   test.each(INVALID_SEEDS)('rejects the seed %p', (seed) => {
     expect(() => createNewGame(PROFILE, testContent, seed)).toThrow(InvariantError);
