@@ -587,14 +587,14 @@ import { createRenderHost } from '../render/render_host';
 import { createUiRoot } from '../ui/ui_root';
 import { createAudioService } from '../audio/audio_service';
 import { createConsoleLogger } from '../utils/logger';
-import { ContentError } from '../utils/errors';
+import { ContentError, InvariantError } from '../utils/errors';
 import { installErrorBoundary } from './error_boundary';
 import { createFlowController } from './flow_controller';
 import { startGameLoop } from './game_loop';
 
 export async function bootstrap(doc: Document): Promise<void> {
   const win = doc.defaultView;
-  if (win === null) throw new Error('bootstrap failed: document has no window');
+  if (win === null) throw new InvariantError('Bootstrap failed: document has no window');
   const now = (): string => new Date().toISOString();
   const logger = createConsoleLogger({ level: import.meta.env.DEV ? 'debug' : 'warn', now, ringSize: 200 });
   const ui = createUiRoot(doc, { content, logger });
@@ -2339,7 +2339,7 @@ export function startGameLoop(win: Window, deps: GameLoopDeps): () => void {
   let handle = 0;
 
   const frame = (now: number): void => {
-    const dt = Math.min(MAX_FRAME_MS, now - last);
+    const dt = Math.max(0, Math.min(MAX_FRAME_MS, now - last)); // 第一幀的 rAF 時間戳可能早於 performance.now()
     last = now;
     if (deps.flow.isClockRunning()) {
       carryMs += dt;
@@ -3129,7 +3129,7 @@ export interface RenderHost {
 export function createRenderHost(doc: Document, options: { logger: Logger; quality: QualityTier | 'auto' }): RenderHost;
 ```
 
-- app 在每次狀態更新後呼叫 `toSceneSnapshot(state, content)`（`app/flow_controller.ts` 內的純函式），再呼叫 `render.apply(snapshot)`。render 內部比較前後快照，只更新有變的部分。
+- app 在每次狀態更新後呼叫 `toSceneSnapshot(state, content)`（`app/flow_controller.ts` 內的純函式），再呼叫 `render.apply(snapshot)`。render 內部比較前後快照，只更新有變的部分。`apply` 是 async（內部丟錯一律變成 rejection）；畫布尺寸與相機構圖（`setSize`＋`cameraFraming`）只在換了場景（相機）、視窗 resize、context 還原時重算，不在每份快照重算，因為 `setSize` 會重配並清空繪圖緩衝。
 - **快照欄位的算法**（v1.1，對應 04 §13.1 G-12；公式都在 `core/selectors.ts`，app 只組裝）：
 
   | 欄位 | 規則 |
@@ -3705,7 +3705,7 @@ export function createMemoryLogger(): Logger & { lines: string[] };
 ```
 
 - 輸出格式：`2027-…T…Z warn [scheduler] event deferred: event=… reason=…`（時間由注入的 `now()` 產生）。
-- 開發模式（`strictSingleLine: true`）收到含 `\n` 的訊息 → 丟 `InvariantError`；正式版把換行轉成 `⏎` 後照樣輸出。
+- 開發模式（`strictSingleLine: true`）收到含 `\n` 的訊息 → 丟 `InvariantError`；正式版把換行轉成 `⏎` 後照樣輸出。這項檢查只針對呼叫端寫的訊息 `m`；`error(m, cause)` 的 cause 文字（常來自第三方、可能多行）在兩種模式都把換行摺成 `⏎`，不會讓 `logger.error` 本身丟錯。
 - core 不呼叫 logger 做流程控制；core 的除錯資訊以回傳值（領域事件、`ContentIssue`）表達，logger 只在 app／persistence／render 邊界使用。core 的 `session.ts` 可以接收 logger 記錄 debug 層級的排程決策。
 - 正式版預設等級 `warn`，開發模式 `debug`。
 

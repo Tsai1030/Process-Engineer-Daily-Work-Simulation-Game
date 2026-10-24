@@ -143,11 +143,11 @@ export function createRenderHost(
 
   return {
     mode: 'webgl',
-    apply(snapshot) {
+    // async：show() 丟出的錯變成 rejection。setSize 會重配並清空繪圖緩衝，所以只在換了場景（相機）時 fit
+    async apply(snapshot) {
       lastSnapshot = snapshot;
-      scenes.show(snapshot);
-      fit();
-      return Promise.resolve();
+      const shownBefore = scenes.current();
+      if (scenes.show(snapshot) !== shownBefore) fit();
     },
     setMotion(policy) {
       motion = policy;

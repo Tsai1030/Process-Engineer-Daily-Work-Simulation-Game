@@ -1,5 +1,6 @@
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace, type Texture } from 'three';
 import type { MachineStatus } from '../model';
+import { RenderError } from '../utils/errors';
 import { PALETTE } from './look';
 
 export interface CanvasTextureFactory {
@@ -35,7 +36,7 @@ export function createCanvasTextureFactory(doc: Document, options: { anisotropy:
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext('2d');
-    if (!context) throw new Error(`Canvas 2D context unavailable: size=${width}x${height}`);
+    if (!context) throw new RenderError('sceneBuild', `canvas 2d context unavailable: size=${width}x${height}`);
     draw(context, width, height);
     const texture = new CanvasTexture(canvas);
     texture.colorSpace = SRGBColorSpace;

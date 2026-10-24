@@ -39,7 +39,7 @@ function withCalibration(snapshot: SceneSnapshot, calibration: Calibration): Sce
 function startRenderLoop(win: Window, render: RenderHost): void {
   let last = win.performance.now();
   const frame = (now: number): void => {
-    render.renderFrame(Math.min(MAX_FRAME_MS, now - last));
+    render.renderFrame(Math.max(0, Math.min(MAX_FRAME_MS, now - last)));
     last = now;
     win.requestAnimationFrame(frame);
   };
@@ -58,7 +58,7 @@ function mountUi(doc: Document, state: GameState): void {
 
 export async function bootstrap(doc: Document): Promise<void> {
   const win = doc.defaultView;
-  if (win === null) throw new Error('bootstrap failed: document has no window');
+  if (win === null) throw new InvariantError('Bootstrap failed: document has no window');
   doc.body.dataset['stage'] = '1';
   const logger = createConsoleLogger({
     level: import.meta.env.DEV ? 'debug' : 'warn',
