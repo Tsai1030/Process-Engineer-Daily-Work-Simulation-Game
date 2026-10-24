@@ -77,6 +77,18 @@ describe('createResourceTracker', () => {
     expect({ sizeBefore, counts }).toEqual({ sizeBefore: 0, counts: [0, 0, 0, 0, 0] });
   });
 
+  it('an owned material cannot dispose the kit gradient map it points at', () => {
+    const gradientMap = createToonKit().material(0xffffff).gradientMap as Texture;
+    const owned = new MeshToonMaterial({ gradientMap });
+    const root = new Group();
+    root.add(new Mesh(new BoxGeometry(), owned));
+    const counts = countDisposals([gradientMap, owned]);
+    const tracker = createResourceTracker();
+    tracker.trackObject(root);
+    tracker.dispose();
+    expect(counts).toEqual([0, 1]);
+  });
+
   it('track returns the resource for inline use', () => {
     const texture = new Texture();
     expect(createResourceTracker().track(texture)).toBe(texture);
