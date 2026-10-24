@@ -62,6 +62,7 @@ export function createToonKit(): ToonKit {
   gradient.generateMipmaps = false;
   gradient.colorSpace = NoColorSpace;
   gradient.needsUpdate = true;
+  markShared(gradient);
 
   const outlineMaterial = new MeshBasicMaterial({ color: PALETTE.outline, side: BackSide });
   markShared(outlineMaterial);
