@@ -17,7 +17,6 @@ export const balance = {
     {
       op: 'when',
       if: { flag: 'flag.tonight_date_with_aan' },
-      // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
       then: [{ op: 'affinity', character: 'chr.aan', delta: -3 }],
     },
   ],

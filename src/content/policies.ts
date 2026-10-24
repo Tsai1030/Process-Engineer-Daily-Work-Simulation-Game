@@ -96,30 +96,25 @@ export const lifePolicies = {
       {
         op: 'chance',
         p: 1,
-        // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
         then: [
           {
             op: 'chance',
             p: 0.2,
-            // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
             then: [{ op: 'affinity', character: 'chr.azhe', delta: 6 }],
             else: [
               {
                 op: 'chance',
                 p: 0.25,
-                // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
                 then: [{ op: 'affinity', character: 'chr.xiaoqing', delta: 6 }],
                 else: [
                   {
                     op: 'chance',
                     p: 0.3333333333333333,
-                    // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
                     then: [{ op: 'affinity', character: 'chr.haoge', delta: 6 }],
                     else: [
                       {
                         op: 'chance',
                         p: 0.5,
-                        // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
                         then: [{ op: 'affinity', character: 'chr.meiling', delta: 6 }],
                         else: [{ op: 'affinity', character: 'chr.vivian', delta: 6 }],
                       },
@@ -131,7 +126,6 @@ export const lifePolicies = {
           },
         ],
       },
-      // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
       { op: 'chance', p: 0.5, then: [{ op: 'stat', stat: 'favor', delta: 1 }] },
       { op: 'stat', stat: 'money', delta: -2500 },
     ],

@@ -4143,10 +4143,15 @@ git commit -m "chore(repo): initialize bun, vite, typescript and biome toolchain
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "suspicious": { "noConsole": "error", "noExplicitAny": "error", "noEmptyBlockStatements": "error" },
+      "preset": "recommended",
+      "suspicious": {
+        "noConsole": "error",
+        "noExplicitAny": "error",
+        "noEmptyBlockStatements": "error",
+        "noThenProperty": "off"
+      },
       "style": { "noNonNullAssertion": "error", "useImportType": "error", "useConst": "error" },
-      "complexity": { "noExcessiveCognitiveComplexity": "warn" }
+      "complexity": { "noExcessiveCognitiveComplexity": "warn", "useLiteralKeys": "off" }
     }
   },
   "overrides": [
@@ -4172,6 +4177,13 @@ git commit -m "chore(repo): initialize bun, vite, typescript and biome toolchain
 ```
 
 > Stage 1 要用 `bunx biome check` 實際驗證這份設定；如果 2.5.15 的規則分組或選項名稱有差異，以該版的 schema 為準修正，並更新本節。
+
+Stage 1 實測 2.5.15 後的修正（本節的設定已是修正後的版本）：
+- `"recommended": true` 在 2.5.15 已標為 deprecated，改用 `"preset": "recommended"`（schema 的 `PresetConfig`：`recommended`／`all`／`none`）。
+- 關閉 `lint/complexity/useLiteralKeys`：它要求把 `dataset['x']`、`userData['x']` 改成 `.x`，與 tsconfig 的 `noPropertyAccessFromIndexSignature`（§14.3，索引簽章只能用方括號存取）直接衝突。
+- 關閉 `lint/suspicious/noThenProperty`：統一模型的 `when`／`chance` 分支與 `NumExpr` 的 `if` 節點把欄位命名為 `then`／`else`（§5.2），值是 `Effect[]`、`NodeId` 或 `NumExpr`，從來不是函式，物件不會被當成 thenable，沒有這條規則要防的 `await` 誤判風險；逐行 `biome-ignore` 只會把內容檔蓋滿註解。
+- `noExcessiveCognitiveComplexity` 維持 warn；`core/conditions.ts` 的 `evaluateCondition`／`evaluateNumber` 是「每個聯集變體一個分支」的平面分派，各加一行有理由的 `biome-ignore`，不拆函式。
+- 門檻：`bunx biome check .` 必須 0 errors、0 warnings、0 infos（CLAUDE.md Definition of Done「No linter/formatter warnings」）。
 
 ### 14.5 `vite.config.ts` 與打包後檢查
 
@@ -4199,9 +4211,16 @@ function productionCsp(): Plugin {
 export default defineConfig({
   base: './',
   plugins: [productionCsp()],
-  build: { target: 'es2022', sourcemap: true },
+  build: {
+    target: 'es2022',
+    sourcemap: true,
+    // three.js alone is ~600 kB minified; the real size gate is check_dist's 350 KB gzip limit on the entry chunk.
+    chunkSizeWarningLimit: 1500,
+  },
 });
 ```
+
+`chunkSizeWarningLimit: 1500`（kB，未壓縮）：Vite 預設在單一 chunk 超過 500 kB 時印警告，但入口 chunk 由 three.js 主導（約 600 kB minified），Stage 1 就會觸發，而且這個警告不會讓建置失敗。真正的體積門檻是下面第 3 項 `check_dist` 的 gzip ≤350 KB；350 KB gzip 大約對應 1.4 MB 未壓縮，所以把 Vite 的警告線放在 1500 kB，讓它只在 `check_dist` 之後才可能出現，建置輸出保持乾淨。
 
 `scripts/check_dist.ts`（`build` 的最後一步）逐項檢查，任何一項失敗就輸出一行訊息並 `exit 1`：
 1. `dist/index.html` 含 CSP `<meta>`。

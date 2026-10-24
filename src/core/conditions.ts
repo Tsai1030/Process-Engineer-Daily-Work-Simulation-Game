@@ -72,6 +72,7 @@ function isTimeBetween(minuteOfDay: number, from: number, to: number): boolean {
   return minuteOfDay >= from || minuteOfDay <= to;
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: flat union dispatch, one branch per variant
 export function evaluateCondition(condition: Condition, ctx: EvalContext): boolean {
   const { state, content } = ctx;
   if ('all' in condition) return condition.all.every((child) => evaluateCondition(child, ctx));
@@ -120,6 +121,7 @@ export function evaluateCondition(condition: Condition, ctx: EvalContext): boole
   throw new InvariantError(`Unhandled condition: condition=${JSON.stringify(unhandled)}`);
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: flat union dispatch, one branch per variant
 export function evaluateNumber(expr: NumExpr, ctx: EvalContext): number {
   if (typeof expr === 'number') return expr;
   const values = (list: readonly NumExpr[]): number[] => list.map((child) => evaluateNumber(child, ctx));

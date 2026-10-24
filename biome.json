@@ -8,10 +8,15 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "suspicious": { "noConsole": "error", "noExplicitAny": "error", "noEmptyBlockStatements": "error" },
+      "preset": "recommended",
+      "suspicious": {
+        "noConsole": "error",
+        "noExplicitAny": "error",
+        "noEmptyBlockStatements": "error",
+        "noThenProperty": "off"
+      },
       "style": { "noNonNullAssertion": "error", "useImportType": "error", "useConst": "error" },
-      "complexity": { "noExcessiveCognitiveComplexity": "warn" }
+      "complexity": { "noExcessiveCognitiveComplexity": "warn", "useLiteralKeys": "off" }
     }
   },
   "overrides": [

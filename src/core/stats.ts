@@ -37,7 +37,6 @@ function scaleOne(effect: Effect, factor: number, options: ScaleOptions): Effect
 }
 
 function scaleWhen(effect: Extract<Effect, { op: 'when' }>, factor: number, options: ScaleOptions): Effect {
-  // biome-ignore lint/suspicious/noThenProperty: when branches are spelled then/else by the model
   const scaled = { ...effect, then: scaleEffects(effect.then, factor, options) };
   return effect.else === undefined ? scaled : { ...scaled, else: scaleEffects(effect.else, factor, options) };
 }

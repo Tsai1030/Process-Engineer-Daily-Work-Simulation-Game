@@ -64,7 +64,6 @@ const RING_CHANCE: NumExpr = {
     sum: [
       0.25,
       { product: [{ sum: [100, { product: [-1, { ownedMachineHealthAvg: true }] }] }, 0.003] },
-      // biome-ignore lint/suspicious/noThenProperty: NumExpr's if node is spelled then/else by the model
       { if: { flag: ROOKIE_FLAG }, then: 0.1, else: 0 },
     ],
   },

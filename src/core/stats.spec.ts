@@ -10,13 +10,11 @@ const LIFE_ACTION = { positiveOnly: true };
 const SWITCH: Condition = { flag: 'flag.test_switch' };
 
 function chanceOf(p: NumExpr, thenEffects: Effect[], elseEffects?: Effect[]): Effect {
-  // biome-ignore lint/suspicious/noThenProperty: chance branches are spelled then/else by the model
   const base = { op: 'chance', p, then: thenEffects } as const;
   return elseEffects === undefined ? base : { ...base, else: elseEffects };
 }
 
 function whenOf(thenEffects: Effect[], elseEffects?: Effect[]): Effect {
-  // biome-ignore lint/suspicious/noThenProperty: when branches are spelled then/else by the model
   const base = { op: 'when', if: SWITCH, then: thenEffects } as const;
   return elseEffects === undefined ? base : { ...base, else: elseEffects };
 }

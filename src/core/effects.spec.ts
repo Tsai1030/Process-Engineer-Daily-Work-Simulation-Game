@@ -169,7 +169,6 @@ describe('applyEffects chance', () => {
   test.each([0, 0.5, 1, 1.5])('a chance with p=%p advances the rng by exactly one step', (p) => {
     const { rngState } = run(
       buildTestState(),
-      // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
       [{ op: 'chance', p, then: [{ op: 'flag', flag: 'flag.test_switch', value: true }] }],
       1,
     );
@@ -180,7 +179,6 @@ describe('applyEffects chance', () => {
     const branch = (p: number): Effect => ({
       op: 'chance',
       p,
-      // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
       then: [{ op: 'flag', flag: 'flag.test_switch', value: true }],
       else: [{ op: 'counter', counter: 'cnt.test_tally', delta: 1 }],
     });
@@ -350,7 +348,6 @@ describe('applyEffects other ops', () => {
       {
         op: 'when',
         if: { flag: 'flag.test_switch' },
-        // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
         then: [{ op: 'counter', counter: 'cnt.test_tally', delta: 1 }],
         else: [{ op: 'counter', counter: 'cnt.test_tally', delta: -1 }],
       },
@@ -361,7 +358,6 @@ describe('applyEffects other ops', () => {
   test('a false when without else changes nothing', () => {
     const state = buildTestState();
     const { result, state: after } = run(state, [
-      // biome-ignore lint/suspicious/noThenProperty: when/chance branches are spelled then/else by the model
       { op: 'when', if: { flag: 'flag.test_switch' }, then: [{ op: 'stat', stat: 'mind', delta: 5 }] },
     ]);
     expect({ result, after }).toEqual({ result: { deltas: [], domainEvents: [] }, after: state });
