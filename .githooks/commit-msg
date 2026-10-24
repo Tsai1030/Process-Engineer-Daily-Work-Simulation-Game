@@ -1,0 +1,4 @@
+#!/bin/sh
+# .githooks/commit-msg
+set -e
+bun run scripts/check_commit_message.ts "$1"

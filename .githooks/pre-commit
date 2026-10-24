@@ -1,0 +1,4 @@
+#!/bin/sh
+# .githooks/pre-commit
+set -e
+bun run verify

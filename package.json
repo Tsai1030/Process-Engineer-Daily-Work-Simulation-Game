@@ -1,0 +1,35 @@
+{
+  "name": "qj-fab7",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.2.21",
+  "engines": {
+    "bun": ">=1.2.21",
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "bun run typecheck && vite build && bun run scripts/check_dist.ts",
+    "preview": "vite preview",
+    "test": "bun test",
+    "test:unit": "bun test ./src",
+    "test:integration": "bun test ./test",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "verify": "bun run typecheck && bun run check && bun test",
+    "hooks:install": "git config core.hooksPath .githooks"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@types/bun": "1.2.21",
+    "@types/three": "0.186.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  }
+}
