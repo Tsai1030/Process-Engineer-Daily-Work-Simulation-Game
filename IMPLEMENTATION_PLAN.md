@@ -14,8 +14,12 @@
 - `bun run verify` 與 `bun run build` 全綠。
 - `bun run dev` 的畫面與 `design/style-c-toon.html` 並排比對，通過 §13.6「視覺一致性」清單（光源強度已重新校準，§9.9）。
 - 故意加一個 `src/core` → `three` 的 import，`architecture.test.ts` 會失敗（紅燈示範後移除）。
+  - **結果（2026-10-25，Task 23）**
+    - (1) 通過：`bun run verify` 全綠，摘要行 `content validation passed: errors=0 warnings=0 events=0 texts=100`、`424 pass`／`0 fail`；`bun run build` 全綠，摘要行 `dist check passed: entry=assets/index-BGI7QAa4.js gzipBytes=168709`；`bunx biome check .` 摘要行 `Checked 84 files in 65ms. No fixes applied.`（0 diagnostics）。
+    - (2) 暫定通過（待人工驗收）：並排校準 6 點 a 10、b 7、c 13、d 16、e 0、f 0（c 與 d 超門檻，見決定紀錄的校準第 5 輪）；§13.6 清單的人眼項目列於待人工驗收清單。
+    - (3) 紅燈示範（Task 14）：`"detail": "core may not import package three", "file": "src/core/arch_probe.ts"`（`every import respects the layer rules of spec 01 section 4.2` FAIL）；刪除探測檔後 19 個測試全數 PASS。
 **Tests**：`rng`（參考值、往返、`int` 範圍）；`conditions`（參數化門檻、空 `all`／`any`、雙重否定）；`effects`（夾限、最大體力、人情溢出、修正器乘數、風向期 ×1.5、`chance` 恰好消耗一次 RNG）；`date`（`2027-06-13` → dayIndex 104、星期日；`2028-02-29` → 365）；`content_validator`（未知旗標、不可達節點、循環、孤兒台詞、負向 `skill`）；`selectors`（`machineStatus` 的 19／20／39／40 邊界、`maxStamina` 含「拚」−10）；`look`（`legacyToPhysical`、`selectLightRig`，04 §2.8）；`architecture` 全部規則；`props`（三角形預算）；整合 `palette_sync`。
-**Status**：In Progress
+**Status**：Complete（暫定通過項目見待人工驗收清單）
 
 ### Stage 2：事件引擎與文字版關鍵日
 **Goal**：`step`、`session`、`flow`、`clock`、`event_scheduler`（含 `tagMultiplier`、`safety` 例外）、`event_runner`（含結果框表情、`favorWaived`）、`seeds`（小遊戲來源不重複）、`black_book`（02 §9.3 的雙排序）、`key_day_planner`（劇本關鍵日）、`thresholds`（`runThresholdMonitor` 的框架：歸零、健康債門檻、借錢排入；安全事件內容在 Stage 5）完成；UI 的 `dialogue_box`、`portrait`、`choice_cards`（鎖卡、門檻章、倒數）、`result_box`、`fx_layer`、`delta_pop`；內容：§8.5 範例一完整，加上序章 D1（#1 工號被消失）。班中時段先用 DOM 的 hotspot 清單代替 3D 走動（也就是 L4 的雛形）。
