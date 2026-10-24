@@ -105,19 +105,35 @@ export function legacyToPhysical(
   return (Math.PI * gammaToLinear(legacyIntensity * legacyFalloff)) / physicalFalloff;
 }
 
-// 04 §2.4 校準表（方案 A 起始值）；行尾註解為範例（r128）舊值
+// 04 §2.4 校準表：方案 A，Stage 1 並排校準 3 輪後的值（逐輪紀錄見 IMPLEMENTATION_PLAN.md 決定紀錄）；行尾註解為範例（r128）舊值與調整
+// 最終 6 點最大通道差（/255）：a 10、b 7、c 13（門檻 12，未過）、d 196（地板格線與範例錯位，不是光源差）、e 0、f 0
 export const CALIBRATION = {
   scheme: 'A',
   gradientSteps: [23, 96, 255], // r128 [85, 165, 255]，sRGB 解碼後的線性值
-  hemisphere: 1.92, // r128 0.8，π × 0.8^2.2
-  directional: 2.2, // r128 0.85，π × 0.85^2.2
-  alarmBright: 60.6, // r128 3.2，參考距離 2.0 m
+  hemisphere: 10.8, // r128 0.8；起始 π × 0.8^2.2 = 1.92，第 2 輪調高：線性空間疊光比範例暗，a～c 綠藍差 59～90
+  directional: 2.8, // r128 0.85；起始 π × 0.85^2.2 = 2.20，第 3 輪調高：c 綠差 23 → 13
+  alarmBright: 60.6, // r128 3.2，參考距離 2.0 m；並排校準未調（a 已在門檻內）
   alarmDark: 5.78, // r128 1.1，參考距離 2.0 m
   alarmInitial: 38.3, // r128 2.6，參考距離 2.0 m
-  photoBase: 61.5, // r128 2.3，參考距離 5.0 m
+  photoBase: 61.5, // r128 2.3，參考距離 5.0 m；第 4 輪試 92 對 6 點無影響，已還原
   photoAmplitude: 8.8, // r128 ±0.15
   pointDecay: 1, // r128 預設 decay 1
 } as const;
+
+// 04 §2.4 步驟 3：校準機位、1600×900、FOV 54、viewOffset 12% 下世界座標投影成的畫面比例
+export const CALIBRATION_SAMPLES: readonly {
+  id: 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
+  label: string;
+  x: number;
+  y: number;
+}[] = [
+  { id: 'a', label: 'ET-03 本體正面（紅光主照區）', x: 0.3621, y: 0.5083 }, // (−3.38, 1.0, 2.0)
+  { id: 'b', label: 'ET-03 頂面', x: 0.3055, y: 0.3247 }, // (−4.6, 2.94, 2.0)
+  { id: 'c', label: '右側第一台機台正面（遠離紅光）', x: 0.8463, y: 0.4157 }, // (3.38, 1.0, 0.0)
+  { id: 'd', label: '鏡頭前 3 m 的地板', x: 0.5193, y: 0.7367 }, // (1.622, 0, 6.029)
+  { id: 'e', label: '主角軀幹', x: 0.3916, y: 0.4514 }, // (−2.45, 1.4, 2.3)
+  { id: 'f', label: '黃光區後牆', x: 0.7672, y: 0.4185 }, // (0, 3.0, −31.9)
+];
 
 export type LightRigId =
   | 'bayDay'

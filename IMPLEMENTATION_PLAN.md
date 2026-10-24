@@ -78,6 +78,21 @@
 - 2026-10-24 `scripts/check_dist.ts` 在 Windows 上把 `Bun.Glob` 回傳的反斜線路徑轉成 `/`，訊息才與計畫的 `assets/….js` 格式一致。
 - 2026-10-25 紅燈示範（分層 import 規則）：暫時加入 `src/core/arch_probe.ts`（`import { Vector3 } from 'three';`）後 `bun test test/architecture.test.ts` 輸出 `"detail": "core may not import package three", "file": "src/core/arch_probe.ts"`（`every import respects the layer rules of spec 01 section 4.2` FAIL），`bun run check` 的 `lint/style/noRestrictedImports` 同時報同一行；刪除該檔後 19 個測試全數 PASS。
 - 2026-10-25 `test/architecture.test.ts` 的 `stripCommentsAndStrings` 回傳與原文等長的字串（註解與字串內容換成空白、換行保留），讓 `importsOf` 能用遮罩後的位置回原文取 import 目標、行號也不位移。
+- 2026-10-25 並排校準方法（04 §2.4）：headless Chrome（swiftshader WebGL）以 DevTools Protocol 設 1600×900、DPR 1、`prefers-reduced-motion: reduce`；參考頁 `design/style-c-toon.html`（r128 由 cdnjs 載入成功）注入 `#ui,.fx,.sfx,.styletag{display:none}` 後截圖；待測頁 `http://localhost:5173/?calib=1`。6 點座標見 `look.ts` 的 `CALIBRATION_SAMPLES`，每點 5×5 平均；下列差值為待測 − 參考（R,G,B），括號內為最大通道差。
+- 2026-10-25 校準第 1 輪（方案 A 起始值，未改）：a 0,−90,−72（90）、b 0,−59,−53（59）、c 0,−86,−72（86）、d +182,+137,+123（182）、e 0,−41,−52（52）、f 0,0,0（0）；a～e 不合格。截圖 `design/calibration/stage1_round1.png`。
+- 2026-10-25 校準第 2 輪（`hemisphere` 1.92 → 10.8）：a 0,−6,+5（6）、b 0,+2,+4（4）、c 0,−23,−14（23）、d +182,+194,+196（196）、e 0,0,0（0）、f 0,0,0（0）；c、d 不合格。截圖 `stage1_round2.png`。
+- 2026-10-25 校準第 3 輪（`directional` 2.2 → 2.8）：a 0,−1,+10（10）、b 0,+7,+7（7）、c 0,−13,−5（13）、d +182,+194,+196（196）、e 0,0,0（0）、f 0,0,0（0）；c 差 1、d 不合格。截圖 `stage1_round3.png`。
+- 2026-10-25 校準第 4 輪（紅點光不調：a 已合格；`photoBase` 61.5 → 92）：6 點與第 3 輪完全相同（黃光到不了 c），已還原成 61.5；最終值＝第 3 輪，畫面＝`stage1_round3.png`。截圖 `stage1_round4.png`。
+- 2026-10-25 校準結論：3 輪後方案 A 仍有 c（綠差 13，門檻 12）與 d 不合格。d 不是光源差：範例與移植的地板格線／網點位置錯開，取樣點在範例落在黑格線上、在移植落在白磚上；在兩邊都是白磚的鄰近點 (0.5119, 0.7233) 量得差 0,0,0。方案 B 需要改 `render_host.ts`（`ColorManagement`、`outputColorSpace`）與 `canvas_textures.ts`（`colorSpace`），超出本 task 允許修改的範圍，**未套用**；以不提交的試驗量過一次 04 §2.4 的 B 備案值：a 22、b 25、c 29、d 196、e 0、f 0，比調整後的 A 差，因此不建議改 B、也不改 01 §9.9。未取樣區域的差異：遠處地板偏白（藍 +33）、天花板紅色偏暗（紅 −37），c 與這兩處需要使用者以人眼裁決。
+- 2026-10-25 01 §13.6 視覺一致性清單（Stage 1 能量測的部分）：
+  - 3 階明暗：機台各面的色帶結構與範例一致；校準機位低於機台頂，看不到頂面與底面 → 待人工驗收（`/` 頁面）。
+  - 黑色描邊：與範例逐列比對相同（y＝450 掃描線各段黑線寬度完全一致，ET-03 左緣 7 px、ET-04 左緣 6 px）；預設機位 4 m 內沒有機台，「4 m 外 6～9 px」未直接量測。
+  - 紅燈閃爍：關閉減少動態時 ET-03 紅燈（74,10,10 ↔ 255,32,32）、螢幕與天花板紅光同步交替，與範例一致；開啟減少動態時連續 4 張截圖逐像素相同且為亮相。頻率 1.7 Hz 由 `fab_bay.spec.ts` 的相位測試涵蓋（headless 的 rAF 節奏無法量 Hz）。暗相的牆面染紅比範例淡（待測 255,242,224、範例 255,206,195）→ 待人工驗收。
+  - 黃光區琥珀色：取樣 f 差 0,0,0（196,153,21），不受紅光影響。通過。
+  - 天車：關閉減少動態時連拍可見沿軌道移動；開啟時停在與範例相同的位置（z ＝ −2）。通過。
+  - 漫畫面板與數值面板（`/` 頁面）：硬陰影、角落網點、傾斜、紅標題貼紙與範例一致；「危」紅斜紋在開局狀態不會出現（數值都高於門檻），未能並排 → 待人工驗收。
+  - 手機版面：DevTools 模擬寬 390 px，HUD 與數值面板依 760 px 以下規則上下排列、左右 16 px、`scrollWidth` ＝ 390，沒有水平捲動，與範例 390 px 版面一致。通過。
+  - 無 3D：Chrome 以 `--disable-webgl --disable-3d-apis` 啟動，`body[data-render="none"]`、HUD 與數值面板正常顯示、沒有未處理例外；本專案只輸出一行 `warn [render] webgl unavailable: detail=…`，但 three 本身在丟例外前另外印了 3 行 `console.error`（`A WebGL context could not be created…`）→ 「Console 只有一行」嚴格來說不符，待使用者裁決是否接受。
 
 ## 驗證器規則的 stage 分配（01 D81）
 
@@ -99,3 +114,5 @@
 
 | 項目 | 出處 | 代理量測的結果 | 需要誰 | 狀態 |
 |---|---|---|---|---|
+| Stage 1 並排校準（6 點取樣） | 01 §15 Stage 1、04 §2.4 | 方案 A 調 3 輪（半球光 10.8、平行光 2.8）：a 10、b 7、c 13、d 196（地板格線錯位，鄰近白磚 0）、e 0、f 0；c 超門檻 1、d 非光源差；方案 B 需改 render 程式碼未套用（試驗值更差） | 使用者 | 暫定通過（待人工驗收） |
+| Stage 1 視覺一致性清單 | 01 §13.6 | 自動測試涵蓋：閃爍相位、紅燈錨點、光組選擇、預算；headless 量測：描邊、黃光區、天車、減少動態、390 px 版面、無 3D 通過；待人眼：頂／底面明暗、暗相染紅程度、「危」斜紋、three 的 3 行 console.error | 使用者 | 暫定通過（待人工驗收） |

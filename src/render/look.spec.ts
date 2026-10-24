@@ -1,6 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 import type { PresentationMood, SceneId } from '../model';
-import { LIGHT_RIGS, type LightRigInput, legacyToPhysical, outlineFor, selectLightRig } from './look';
+import {
+  CALIBRATION_SAMPLES,
+  LIGHT_RIGS,
+  type LightRigInput,
+  legacyToPhysical,
+  outlineFor,
+  selectLightRig,
+} from './look';
 
 // 04 §2.8 的預先手算值（誤差 ±0.5）
 const LEGACY_CASES = [
@@ -102,5 +109,13 @@ describe('LIGHT_RIGS', () => {
       .filter(([, rig]) => rig.fog !== null && rig.fog.color !== rig.background)
       .map(([id]) => id);
     expect(mismatched).toEqual(['bayAlarm', 'photoAmber']);
+  });
+});
+
+describe('CALIBRATION_SAMPLES', () => {
+  test('every sample point lies inside the 0 to 1 screen fraction on both axes', () => {
+    const inside = (v: number): boolean => v >= 0 && v <= 1;
+    const outside = CALIBRATION_SAMPLES.filter((s) => !inside(s.x) || !inside(s.y)).map((s) => s.id);
+    expect(outside).toEqual([]);
   });
 });
