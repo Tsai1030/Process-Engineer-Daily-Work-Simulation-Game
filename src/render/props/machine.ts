@@ -39,7 +39,7 @@ export function createEtchMachine(
     kit.box(root, [0.08, 1.4, 1.3], PALETTE.toolDoor, [fx + dir * 0.04, 1.1, -0.85], 0.03),
     kit.box(root, [0.1, 0.5, 0.06], PALETTE.toolBlack, [fx + dir * 0.1, 1.1, -0.3], 0.02),
     kit.box(root, [0.14, 0.8, 1.25], PALETTE.toolBlack, [fx + dir * 0.07, 1.7, 0.75], 0.04),
-    kit.cylinder(root, [0.035, 0.035], 0.4, PALETTE.toolBlack, [dir * 0.9, 3.1, 1.3], 0.03),
+    kit.cylinder(root, [0.035, 0.035], 0.4, PALETTE.toolPole, [dir * 0.9, 3.1, 1.3], 0.03),
   ];
   for (const part of staticParts) part.userData['static'] = true;
 

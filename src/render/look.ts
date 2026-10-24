@@ -21,6 +21,7 @@ export const PALETTE = {
   toolBand: 0x2b2b2e,
   toolDoor: 0xcfcac0,
   toolBlack: 0x111111,
+  toolPole: 0x222222,
   screenBg: 0x0d1114,
   screenRun: 0x2bd45a,
   screenWarn: 0xffd400,
@@ -42,6 +43,7 @@ export const PALETTE = {
   eyeBand: 0x1d2a3a,
   mask: 0xffffff,
   lanyard: 0xe60012,
+  heroSkin: 0xf1c9a5,
   holdTagRed: 0xe60012,
   holdTagYellow: 0xffd400,
   holdTagWhite: 0xffffff,
@@ -105,8 +107,7 @@ export function legacyToPhysical(
   return (Math.PI * gammaToLinear(legacyIntensity * legacyFalloff)) / physicalFalloff;
 }
 
-// 04 §2.4 校準表：方案 A，Stage 1 並排校準 3 輪後的值（逐輪紀錄見 IMPLEMENTATION_PLAN.md 決定紀錄）；行尾註解為範例（r128）舊值與調整
-// 最終 6 點最大通道差（/255）：a 10、b 7、c 13（門檻 12，未過）、d 196（地板格線與範例錯位，不是光源差）、e 0、f 0
+// 04 §2.4 校準表：方案 A，Stage 1 並排校準後的值；行尾註解為範例（r128）舊值與調整。最新 6 點差值見 IMPLEMENTATION_PLAN.md 決定紀錄
 export const CALIBRATION = {
   scheme: 'A',
   gradientSteps: [23, 96, 255], // r128 [85, 165, 255]，sRGB 解碼後的線性值

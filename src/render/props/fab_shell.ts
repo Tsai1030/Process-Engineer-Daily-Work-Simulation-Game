@@ -13,7 +13,7 @@ import { PALETTE } from '../look';
 import type { ToonKit } from '../toon_kit';
 import type { PropHandle } from './machine';
 
-const FLOOR_REPEAT = [21.67, 166.67] as const;
+const FLOOR_REPEAT = [24, 100] as const;
 const WALL_REPEAT = [7, 1] as const;
 const HAZARD_REPEAT = [16, 1] as const;
 const LAMP_PANEL_X = [-3, 3] as const;

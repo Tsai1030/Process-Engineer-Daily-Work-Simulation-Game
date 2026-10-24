@@ -356,7 +356,7 @@ export const PALETTE = {
   photoWall: 0xffd21a, photoCeiling: 0xe0a800, photoFloor: 0xf2b800, photoGlass: 0xffe14d,
   photoTool: 0x2a2a2a, photoToolTop: 0x111111, hazardYellow: 0xffd400, hazardBlack: 0x000000,
   // 機台（範例值）
-  toolBody: 0xe9e6df, toolBand: 0x2b2b2e, toolDoor: 0xcfcac0, toolBlack: 0x111111,
+  toolBody: 0xe9e6df, toolBand: 0x2b2b2e, toolDoor: 0xcfcac0, toolBlack: 0x111111, toolPole: 0x222222,
   screenBg: 0x0d1114, screenRun: 0x2bd45a, screenWarn: 0xffd400, screenDown: 0xe60012,
   lampGreenOn: 0x38ff6a, lampYellowOn: 0xffe600, lampRedOn: 0xff2020,
   lampGreenOff: 0x0e3a1a, lampYellowOff: 0x4a4000, lampRedOff: 0x4a0a0a,
@@ -364,6 +364,7 @@ export const PALETTE = {
   ohtBody: 0xfafafa, ohtStripe: 0xe60012, foupShell: 0xcfe6ff, foupHandle: 0xff8a00, foupDoor: 0x7fa8d0,
   // 人物（範例值）
   suit: 0xf7f7f2, suitBoot: 0xe0e0da, glove: 0x2a6fe0, eyeBand: 0x1d2a3a, mask: 0xffffff, lanyard: 0xe60012,
+  heroSkin: 0xf1c9a5, // 範例主角臉（style-c-toon.html L597）；只用在 scn.fab_bay 的校準主角
   // 新增
   holdTagRed: 0xe60012, holdTagYellow: 0xffd400, holdTagWhite: 0xffffff,
   stocker: 0xdcdad2, stockerWindow: 0x9fb8c9, wrapPlastic: 0xe8f1f5,
@@ -804,7 +805,7 @@ export function selectOverlays(input: { mood: PresentationMood; shot: CameraShot
 
 | 物件 | 尺寸／位置 | 材質 | 描邊 | 來源 |
 |---|---|---|---|---|
-| 高架地板 | `PlaneGeometry(13, 100)`，中心 (0, 0, −30) | toon `0xffffff` ＋ 地板貼圖（§5.10），**重複 21.67 × 166.67**（0.6 m 方格） | 無 | 範例值；重複次數改成真實 0.6 m 格板（範例為 24 × 100，§15 #10） |
+| 高架地板 | `PlaneGeometry(13, 100)`，中心 (0, 0, −30) | toon `0xffffff` ＋ 地板貼圖（§5.10），**重複 24 × 100** | 無 | 範例值（Stage 1 收尾依 00 §2-3「範例值優先」改回範例的 24 × 100，§15 #10 已撤回） |
 | 側牆 ×2 | `PlaneGeometry(28, 6)`，x = ±6.2，中心 z = −2（z ＋12～−16） | toon `0xffffff` ＋ 牆板貼圖，重複 (7, 1)，雙面 | 無 | 範例值 |
 | bay 頭牆（新增） | `PlaneGeometry(12.4, 6)`，z = +12；中央開門 2.0 × 2.4 m | 同牆板 | 門框 `toolBlack` box 0.12 m，`S` 描邊 | 新增 |
 | 天花板 | `PlaneGeometry(13, 60)`，y = 6，中心 z = −14 | toon `0x3a3a3f` ＋ FFU 格線貼圖（1.2 × 0.6 m 一格，§5.11） | 無 | 範例值＋格線（GDD「頭頂 FFU 格子」） |
@@ -1133,7 +1134,7 @@ WebGL 不可用時（01 §9.7 L4），每個場景改成 CSS 組成的漫畫格�
 | 機台標牌 | plane 1.2 × 0.3 | (fx + dir·0.04, 2.4, 0.75) | basic ＋ 標籤圖集（白底黑框黑字「ET-03」） | 無 | 範例值 |
 | Load port 平台（新增） | box 0.5（外伸）× 0.06 × 1.3 | (fx + dir·0.25, 0.88, −0.85) | `toolBand` | 0.03 | 新增：真實 load port 高約 0.9 m（SEMI 標準） |
 | FOUP × 2（新增） | §5.3 | 平台上，z = −1.17、−0.53 | — | — | 新增 |
-| 燈塔桿 | cylinder r 0.035，h 0.4，16 段 | (dir·0.9, 3.1, 1.3) | `toolBlack` | 0.03 | 範例值 |
+| 燈塔桿 | cylinder r 0.035，h 0.4，16 段 | (dir·0.9, 3.1, 1.3) | `toolPole`（`0x222222`） | 0.03 | 範例值 |
 | 燈號 × 3 | cylinder r 0.12，h 0.17，16 段 | 同 x、z；y = 3.34（綠）、3.54（黃）、3.74（紅） | §5.2 | 0.03 | 範例值 |
 
 - **狀態** `setState(MachineStatus)`：
@@ -1205,7 +1206,7 @@ WebGL 不可用時（01 §9.7 L4），每個場景改成 CSS 組成的漫畫格�
 
 | 貼圖 | 尺寸 | 畫法 | 重複 | 來源 |
 |---|---|---|---|---|
-| 高架地板 `floorTex` | 128² | 底 `#d8d6cc`；4 × 4 個實心孔 r = 7 px `#1b1b1b`，間距 32 px、起點 16；外框 6 px `#000` | (21.67, 166.67)，一格 0.6 m | 範例值（重複改為真實 0.6 m 格板） |
+| 高架地板 `floorTex` | 128² | 底 `#d8d6cc`；4 × 4 個實心孔 r = 7 px `#1b1b1b`，間距 32 px、起點 16；外框 6 px `#000` | (24, 100)，一格 0.54 × 1.0 m | 範例值 |
 | 牆板 `wallTex` | 256² | 底 `#efede6`；外框 8 px；y = 190 處 4 px 橫線；橫線以下 8 px 間距網點 r = 1.6、`rgba(0,0,0,.45)` | (7, 1) | 範例值 |
 | 斜紋 `hazardTex` | 128² | 底 `#ffd400`；黑色 45° 斜帶，寬 16 px、間距 32 px | (16, 1) | 範例值 |
 | FFU 天花板（新增） | 128²（代表 1.2 × 1.2 m＝兩片 1.2 × 0.6 m 的 FFU） | 底 `#ffffff`（乘上材質色 `3a3a3f`）；外框與中線 4 px `#000`；每片中央 0.8 × 0.4 比例的細網點區（濾網），點 r = 1、`#bbbbbb` | (10.83, 50) | 新增（GDD「頭頂 FFU 格子」、FD §5.4） |
@@ -2762,7 +2763,7 @@ WebGL 不可用時（01 §9.7 L4），每個場景改成 CSS 組成的漫畫格�
 7. 不使用後製；降飽和用 CSS filter（L0／L1）或光色內插（L2），「停下來」用 DOM 紙色遮罩（§2.6）。
 8. 光源數量在場景建構時固定，切換光組只改顏色與強度，避免著色器重新編譯（§3.2）。
 9. `bayNight` 是刻意的戲劇化：真實 fab 夜裡燈光不變（§3.1）。
-10. 高架地板貼圖的重複改成真實的 0.6 m 方格（範例是 0.54 × 1.0 m）（§4.2）。
+10. ~~高架地板貼圖的重複改成真實的 0.6 m 方格（範例是 0.54 × 1.0 m）（§4.2）。~~ 已撤回（Stage 1 收尾）：00 §2-3 範例值優先，地板重複維持範例的 24 × 100，與範例的格線位置一致，校準點 d 才有意義。
 11. 走道寬 6.8 m、天花板 6 m 維持範例的放大比例（為了鏡頭），機台、load port、FOUP、門、桌椅維持真實比例（§4.1）。
 12. 右側佈景機台從範例的 CVD／PVD／CMP 改成 ET-07～10：bay-and-chase 佈局下同一條 bay 通常是同一模組（FD §5.4），ET-07 做成裝機中的包膜機台呼應大D 的 buy-off 線（§4.2）。
 

@@ -98,7 +98,7 @@ function createCalibrationHero(kit: ToonKit): { root: Group; head: Group } {
   head.rotation.x = HERO.headPitch;
   torso.add(head);
   kit.sphere(head, 0.2, PALETTE.suit, [0, 0.12, 0], 0.03);
-  kit.sphere(head, 0.13, PALETTE.skinS2, [0, 0.1, 0.1], 0.02);
+  kit.sphere(head, 0.13, PALETTE.heroSkin, [0, 0.1, 0.1], 0.02);
   kit.box(head, [0.3, 0.07, 0.06], PALETTE.eyeBand, [0, 0.17, 0.17], 0.02);
   kit.box(head, [0.26, 0.11, 0.07], PALETTE.mask, [0, 0.04, 0.17], 0.02);
   kit.box(torso, [0.03, 0.3, 0.02], PALETTE.lanyard, [0.16, 0.45, 0.25], 0.01);
