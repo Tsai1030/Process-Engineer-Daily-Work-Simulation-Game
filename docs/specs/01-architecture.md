@@ -4578,7 +4578,7 @@ perf(render): drop to medium quality after five seconds below 45 fps
 | `audio/audio_service.ts` | `AudioService`、`AmbienceKind`、`createAudioService`（§10.8） |
 | `render/look.ts` | `PALETTE`、`OUTLINE_T`、`outlineFor`、`CALIBRATION`、`LIGHT_RIGS`、`LIGHT_OVERLAYS`、`legacyToPhysical`、`selectLightRig`、`selectOverlays`、`blendRig`、`PIXEL_RATIO_CAP`、`LightRig`、`LightRigId`、`LightRigInput`、`FabZone`（04 §2.8） |
 | `render/scenes/backdrop_2_5d.ts` | `BackdropSpec`、`BackdropLighting`、`BackdropPropKind`（§9.11） |
-| `render/render_host.ts` | `createRenderHost`、`RenderHost`、`MoveIntent`、`HotspotSignal` |
+| `render/render_host.ts` | `createRenderHost`、`RenderHost`、`MoveIntent`、`HotspotSignal`、`cameraFraming`、`CameraFraming` |
 | `render/scene_manager.ts` | `SceneModule`、`SceneFactory`、`SceneBuildContext`、`createSceneManager`、`SceneManager` |
 | `render/toon_kit.ts` | `createToonKit`、`ToonKit`、`OutlineStrategy`、`GRADIENT_STEPS` |
 | `render/asset_sources.ts` | `CharacterModelSource`、`createProceduralCharacterSource`、`createCharacterSource` |

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN
 
-> Stage 1 開工時，把本節複製成專案根目錄的 `IMPLEMENTATION_PLAN.md`，隨進度更新 Status；全部完成後刪除該檔案（CLAUDE.md）。每個 stage 結束時都必須能編譯、`bun run verify` 全綠、可以展示。
+> 隨進度更新 Status；全部完成後刪除本檔（CLAUDE.md）。每個 stage 結束時都必須能編譯、`bun run verify` 全綠、可以展示。
 
 **v1.2（審查回合 1）的三條共通規則**
 
@@ -23,6 +23,7 @@
 - 在瀏覽器裡只用鍵盤玩完 06/13 值班夜的 4 條路線（含鎖卡與門檻卡）。
 - 無頭測試：固定種子選「貳」→ 伏筆依種子決定是否觸發 → 黑歷史本有一筆、`citeWhen` 正確。
 - `validate-content` 對範例一 0 個 error、0 個 warning（v1.1 已刪除 waiver）。
+**開工前關卡**：第一個 Stage 2 core task 開始前，先拍板 D71（`ending` 效果設定的待觸發結局放在 GameState 的哪個欄位），並替 `rng.pickWeighted` 的 NaN 權重與 `rng.chance` 的無效 `p` 加上 fail-fast 檢查。
 **Tests**：`event_runner`（9 種節點逐一、鎖卡丟 `InvariantError`、chip 只取最上層可見數值、自動鎖卡說明）；`event_scheduler`（優先序、名額、冷卻、overflow 三種處置、**候選陣列打亂順序結果不變**）；`seeds`（窗口、只擲一次、容量淘汰、`onExpire`、快轉中求值）；`black_book`（分數、淘汰、引用前 3 筆、`citeWhen`、P／M+ 正面優先）；`thresholds`（02 §1.6 的同批跨門檻順序）；`flow`（轉移表）；`clock`（跨 16:30、下班等互動結束）；`step`（狀態不可變：輸入物件在呼叫後不變）。
 **Status**：Not Started
 
@@ -33,6 +34,7 @@
 - 手機（2021 中階機）班中 ≥30 fps、桌機內顯 ≥60 fps。沒有實機時：Chrome DevTools CPU 4× 降速下班中 ≥30 fps，**暫定通過（待人工驗收）**。
 - L3、L4 都能完整玩一天。
 - 場景來回切換 10 次後 GPU 記憶體回到基準。
+- `scn.fab_bay` 進入 draw call 預算（`docs/issues.md` #2）：`static_batcher`＋`InstancedMesh` 把約 278 個 mesh 壓到 ≤70（01 §9.7、04 §4.1），補上 04 §4 要求的 mesh 數斷言；手機的 quality tier 把 `staging_light`（第 3 盞固定點光源）強度歸零（04 §3 光源數量固定，不移除光源）。
 **Tests**：4 個小遊戲邏輯（03 各節 X.11：成績、成敗、時間成本、疲勞與壓力變難、同種子結果相同）；`difficulty`、`procgen`；`minigame_rewards`（換算表、教學只套正值、KPI 排除）；`workday`（02 §13.2：每小時效果、主管好感當日上限 +4、自動完成任務、睡眠回復 45／39／23）；`navigation`（牆邊滑動、障礙、hotspot 距離）；`camera_director`（插值、減少動態直接到終點）；`quality`（降級決策表）；`static_batcher`（合併後網格數）；整合 `scene_hotspots`。
 **Status**：Not Started
 
@@ -93,6 +95,8 @@
   - 漫畫面板與數值面板（`/` 頁面）：硬陰影、角落網點、傾斜、紅標題貼紙與範例一致；「危」紅斜紋在開局狀態不會出現（數值都高於門檻），未能並排 → 待人工驗收。
   - 手機版面：DevTools 模擬寬 390 px，HUD 與數值面板依 760 px 以下規則上下排列、左右 16 px、`scrollWidth` ＝ 390，沒有水平捲動，與範例 390 px 版面一致。通過。
   - 無 3D：Chrome 以 `--disable-webgl --disable-3d-apis` 啟動，`body[data-render="none"]`、HUD 與數值面板正常顯示、沒有未處理例外；本專案只輸出一行 `warn [render] webgl unavailable: detail=…`，但 three 本身在丟例外前另外印了 3 行 `console.error`（`A WebGL context could not be created…`）→ 「Console 只有一行」嚴格來說不符，待使用者裁決是否接受。
+- 2026-10-25 Stage 1 收尾 Biome：上面「設定維持原文」已改寫——`recommended: true` 換成 `preset: "recommended"`，關閉 `useLiteralKeys`（與 tsconfig `noPropertyAccessFromIndexSignature` 衝突）與 `noThenProperty`（模型的 `then`／`else` 不是函式），`conditions.ts` 兩個平面分派函式各加一行 `biome-ignore`；`bunx biome check .` 現為 0 diagnostics。Vite 的 chunk 警告線提到 1500 kB，體積門檻以 `check_dist` 的 gzip 350 KB 為準。已同步 01 §14.4、§14.5。
+- 2026-10-25 單元測試範圍：01 §13.1「組裝不寫單元測試」針對的是 DOM／WebGL 接線；src/app 與 src/render 裡的純函式（例如 `toSceneSnapshot`、`cameraFraming`）可以、也應該有單元測試。
 - 2026-10-25 Stage 1 收尾「範例值優先」（00 §2-3）的三處修正：①燈塔桿改用新色票 `toolPole: 0x222222`（範例 `style-c-toon.html` L560；原本誤用 `toolBlack` 0x111111）；②校準主角的臉改用新色票 `heroSkin: 0xf1c9a5`（範例 L597；原本用 `skinS2` 0xf6d6b8）；③地板貼圖重複改回範例的 24 × 100（範例 L431；原本為了真實 0.6 m 格板改成 21.67 × 166.67，04 §15 #10 撤回）。已同步 04 §1.6、§4.2、§5.1、§5.6、§15。
 - 2026-10-25 校準第 5 輪（只改地板重複 24 × 100；光源常數不變，方法同上，參考圖沿用 `reference_r128.png`）：
 
