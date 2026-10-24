@@ -48,6 +48,7 @@ interface Edge {
 }
 type Declarations = Readonly<Record<ReferencePrefix, ReadonlySet<string>>>;
 type PresetNames = ReadonlyMap<string, ReadonlySet<string>>;
+type SeedSites = ReadonlyMap<string, string>;
 
 const REGISTRY_PREFIX: Readonly<Record<RegistryField, DeclaredPrefix>> = {
   keyDays: 'kd',
@@ -217,7 +218,29 @@ function choiceIdsOf(nodeId: NodeId, node: EventNode): Located[] {
     : [...choices, { path: `nodes.${nodeId}.countdown.onTimeout.id`, value: onTimeout.id }];
 }
 
-function eventIdIssues(eventId: string, event: EventDef): ContentIssue[] {
+function seedDeclarationSite(eventId: string, index: number): string {
+  return `${eventId} seeds[${index}]`;
+}
+
+function firstSeedDeclarations(events: ReadonlyMap<string, EventDef>): SeedSites {
+  const first = new Map<string, string>();
+  for (const [eventId, event] of events) {
+    for (const [index, seed] of (event.seeds ?? []).entries()) {
+      if (!first.has(seed.id)) first.set(seed.id, seedDeclarationSite(eventId, index));
+    }
+  }
+  return first;
+}
+
+function duplicateSeedIssues(eventId: string, event: EventDef, firstSeeds: SeedSites): ContentIssue[] {
+  return (event.seeds ?? []).flatMap((seed, index) =>
+    firstSeeds.get(seed.id) === seedDeclarationSite(eventId, index)
+      ? []
+      : [errorIssue(eventId, `seeds[${index}].id`, `duplicate seed id '${seed.id}'`)],
+  );
+}
+
+function eventIdIssues(eventId: string, event: EventDef, firstSeeds: SeedSites): ContentIssue[] {
   const nodes = Object.entries(event.nodes);
   const nodeIds = nodes.map(([nodeId]) => ({ path: `nodes.${nodeId}`, value: nodeId }));
   const seedIds = (event.seeds ?? []).map((seed, index) => ({ path: `seeds[${index}].id`, value: seed.id }));
@@ -229,14 +252,19 @@ function eventIdIssues(eventId: string, event: EventDef): ContentIssue[] {
       CHOICE_ID,
     ),
     ...invalidIds(eventId, seedIds, ID_PATTERNS.seed),
+    ...duplicateSeedIssues(eventId, event, firstSeeds),
   ];
 }
 
-function idIssues(definition: Definition, events: ReadonlyMap<string, EventDef>): ContentIssue[] {
+function idIssues(
+  definition: Definition,
+  events: ReadonlyMap<string, EventDef>,
+  firstSeeds: SeedSites,
+): ContentIssue[] {
   const event = definition.registry === 'events' ? events.get(definition.id) : undefined;
   return [
     ...registryIdIssues(definition),
-    ...(event === undefined ? [] : eventIdIssues(definition.id, event)),
+    ...(event === undefined ? [] : eventIdIssues(definition.id, event, firstSeeds)),
     ...invalidIds(definition.id, modifierDeclarations(definition.value), ID_PATTERNS.mod),
   ];
 }
@@ -380,6 +408,16 @@ function reachabilityIssues(eventId: string, start: NodeId, edges: ReadonlyMap<N
     : [...unreachable, errorIssue(eventId, firstBackEdge.path, `node graph cycle back to '${firstBackEdge.target}'`)];
 }
 
+function emptyNodeIssues(eventId: string, nodeId: NodeId, node: EventNode): ContentIssue[] {
+  if (node.kind === 'choice' && node.choices.length === 0) {
+    return [errorIssue(eventId, `nodes.${nodeId}.choices`, 'choice node has no choices')];
+  }
+  if (node.kind === 'roll' && node.outcomes.length === 0) {
+    return [errorIssue(eventId, `nodes.${nodeId}.outcomes`, 'roll node has no outcomes')];
+  }
+  return [];
+}
+
 function nodeGraphIssues(eventId: string, event: EventDef): ContentIssue[] {
   const nodes = Object.entries(event.nodes);
   const edges = new Map(nodes.map(([nodeId, node]) => [nodeId, edgesOf(nodeId, node)]));
@@ -389,13 +427,10 @@ function nodeGraphIssues(eventId: string, event: EventDef): ContentIssue[] {
     .flat()
     .filter((next) => !edges.has(next.target))
     .map((next) => errorIssue(eventId, next.path, `unknown node '${next.target}'`));
-  const emptyChoices = nodes
-    .filter(([, node]) => node.kind === 'choice' && node.choices.length === 0)
-    .map(([nodeId]) => errorIssue(eventId, `nodes.${nodeId}.choices`, 'choice node has no choices'));
   return [
     ...missingStart,
     ...danglingEdges,
-    ...emptyChoices,
+    ...nodes.flatMap(([nodeId, node]) => emptyNodeIssues(eventId, nodeId, node)),
     ...(startExists ? reachabilityIssues(eventId, event.start, edges) : []),
   ];
 }
@@ -436,12 +471,13 @@ export function validateContent(content: ContentBundle): ContentIssue[] {
   const events = new Map<string, EventDef>(Object.entries(content.events));
   const declarations = collectDeclarations(content, definitions);
   const presets = presetNamesOf(content.minigames);
+  const firstSeeds = firstSeedDeclarations(events);
   const scanned = definitions.map((definition) => ({ definition, references: referencesIn(definition) }));
   const referencedTexts = new Set(
     scanned.flatMap(({ references }) => references.filter((r) => r.prefix === 't').map((r) => r.value)),
   );
   return [
-    ...definitions.flatMap((definition) => idIssues(definition, events)),
+    ...definitions.flatMap((definition) => idIssues(definition, events, firstSeeds)),
     ...scanned.flatMap(({ definition, references }) => [
       ...unknownReferenceIssues(definition.id, references, declarations),
       ...presetIssues(definition, content, presets),

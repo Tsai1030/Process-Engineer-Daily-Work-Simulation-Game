@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { defined, testContent } from '../../test/fixtures';
-import type { ContentBundle, ContentIssue, EventNode, TaskDef } from '../model';
+import type { ContentBundle, ContentIssue, EventId, EventNode, TaskDef } from '../model';
 import { validateContent } from './content_validator';
 
 type Mutable<T> = { -readonly [K in keyof T]: Mutable<T[K]> };
@@ -13,8 +13,8 @@ interface Case {
   expected: ContentIssue[];
 }
 
-function eventOf(content: MutableContent) {
-  return defined(content.events['ev.test_scripted'], 'ev.test_scripted');
+function eventOf(content: MutableContent, eventId: EventId = 'ev.test_scripted') {
+  return defined(content.events[eventId], eventId);
 }
 
 function nodeOf<K extends EventNode['kind']>(content: MutableContent, nodeId: string, kind: K): NodeOfKind<K> {
@@ -323,6 +323,37 @@ describe('validateContent', () => {
         c.text['t.ev.test_scripted.line'] = '{name}和{pronoun}在{date}拿到{grade}';
       },
       expected: [],
+    },
+    {
+      name: 'seed id declared by a second event',
+      mutate: (c) => {
+        const seed = defined(eventOf(c).seeds?.[0], 'seeds[0]');
+        eventOf(c, 'ev.test_seeded').seeds = [{ ...seed, outcome: { event: 'ev.test_seeded' } }];
+      },
+      expected: [
+        {
+          severity: 'error',
+          id: 'ev.test_seeded',
+          path: 'seeds[0].id',
+          message: "duplicate seed id 'seed.test_followup'",
+        },
+      ],
+    },
+    {
+      name: 'roll node without outcomes',
+      mutate: (c) => {
+        eventOf(c, 'ev.test_micro').nodes = {
+          n_tally: {
+            kind: 'effects',
+            effects: [{ op: 'counter', counter: 'cnt.test_tally', delta: 1 }],
+            next: 'n_roll',
+          },
+          n_roll: { kind: 'roll', outcomes: [] },
+        };
+      },
+      expected: [
+        { severity: 'error', id: 'ev.test_micro', path: 'nodes.n_roll.outcomes', message: 'roll node has no outcomes' },
+      ],
     },
   ])('$name', ({ mutate, expected }) => {
     const content = structuredClone(testContent) as MutableContent;
