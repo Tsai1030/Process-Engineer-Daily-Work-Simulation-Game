@@ -1,0 +1,116 @@
+/* src/ui/styles/tokens.css — 風格 C 設計 token（04 §1） */
+@import url("https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@500;700;900&display=swap");
+
+:root {
+  /* 色票 */
+  --ink: #0a0a0a;
+  --paper: #fffdf4;
+  --red: #e60012;
+  --red-deep: #9d000d;
+  --yellow: #ffd400;
+  --grey: #d9d6cc;
+  --white: #ffffff;
+  --ink-soft: #5a574f;
+  --paper-calm: #f4efe3;
+  --ink-calm: #34322d;
+  --stage: #1a0407;
+  --screen-run: #2bd45a;
+  --screen-warn: #ffd400;
+  --screen-down: #e60012;
+  --glove: #2a6fe0;
+  --amber: #ffd21a;
+
+  /* 字體 */
+  --f-body:
+    "LXGW WenKai TC", "Noto Serif TC", "Microsoft JhengHei", "PingFang TC", "Heiti TC", "Noto Sans CJK TC", sans-serif;
+  --f-head: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", "Heiti TC", "Noto Sans CJK TC", Arial, sans-serif;
+  --f-calm: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+
+  /* 字級（--text-scale 由 settings 設定：1 | 1.15 | 1.3） */
+  --text-scale: 1;
+  --fs-sfx: calc(clamp(28px, 6vw, 70px) * var(--text-scale));
+  --fs-clock: calc(clamp(26px, 3.4vw, 38px) * var(--text-scale));
+  --fs-idx: calc(34px * var(--text-scale));
+  --fs-h1: calc(clamp(28px, 4vw, 44px) * var(--text-scale));
+  --fs-h2: calc(22px * var(--text-scale));
+  --fs-line: calc(clamp(17px, 1.9vw, 21px) * var(--text-scale));
+  --fs-card: calc(clamp(17px, 1.8vw, 21px) * var(--text-scale));
+  --fs-name: calc(17px * var(--text-scale));
+  --fs-ui: calc(15px * var(--text-scale));
+  --fs-label: calc(14px * var(--text-scale));
+  --fs-chip: calc(13px * var(--text-scale));
+  --fs-inner: calc(15px * var(--text-scale));
+  --fs-min: calc(12px * var(--text-scale));
+  --lh-line: 1.65;
+  --lh-ui: 1.35;
+  --lh-calm: 1.8;
+
+  /* 線條 */
+  --bw-hair: 2px;
+  --bw-thin: 3px;
+  --bw: 4px;
+  --bw-thick: 5px;
+  --bw-double: 7px;
+  --ts-s: 3px;
+  --ts-m: 5px;
+  --ts-l: 9px;
+
+  /* 硬陰影 */
+  --sh-s: 3px 3px 0 var(--ink);
+  --sh-m: 4px 4px 0 var(--ink);
+  --sh: 6px 6px 0 var(--ink);
+  --sh-l: 10px 10px 0 var(--ink);
+  --sh-red: 5px 5px 0 var(--red);
+  --sh-red-s: 3px 3px 0 var(--red);
+
+  /* 邊框形狀 */
+  --r-panel: 6px 14px 8px 12px / 12px 6px 14px 8px;
+  --r-bubble: 30px 12px 28px 10px / 14px 26px 12px 28px;
+  --r-frame: 6px;
+  --r-chip: 3px;
+  --r-doc: 4px;
+
+  /* 網點 */
+  --dots-panel: radial-gradient(circle, rgba(10, 10, 10, 0.5) 1.1px, transparent 1.6px) 0 0 / 6px 6px;
+  --dots-card: radial-gradient(circle, rgba(10, 10, 10, 0.8) 1.6px, transparent 2.2px) 0 0 / 7px 7px;
+  --dots-fx: radial-gradient(circle, #000 28%, transparent 31%) 0 0 / 7px 7px;
+  --dots-sparkle: radial-gradient(circle, #fffdf4 28%, transparent 31%) 0 0 / 9px 9px;
+
+  /* 斜紋 */
+  --stripe-bar: repeating-linear-gradient(135deg, #fff 0 4px, var(--grey) 4px 6px);
+  --stripe-danger: repeating-linear-gradient(135deg, var(--red) 0 5px, var(--red-deep) 5px 8px);
+  --stripe-locked: repeating-linear-gradient(135deg, var(--grey) 0 6px, var(--paper) 6px 12px);
+  --stripe-hazard: repeating-linear-gradient(135deg, var(--yellow) 0 12px, var(--ink) 12px 24px);
+
+  /* 動態（steps 是漫畫感的來源；減少動態時全部歸 0，見 fx.css） */
+  --t-press: 120ms steps(2, end);
+  --t-pop: 500ms steps(3, end);
+  --t-panel-in: 240ms steps(3, end);
+  --t-page: 200ms linear;
+  --t-delta: 1700ms steps(10, end);
+  --t-shake: 500ms steps(2, end);
+  --t-alert: 1200ms steps(2, end);
+  --t-calm-fade: 4000ms linear;
+
+  /* 圖層 */
+  --z-scene: 0;
+  --z-fx: 1;
+  --z-sfx: 2;
+  --z-ui: 3;
+  --z-overlay: 4;
+  --z-modal: 5;
+  --z-live: 6;
+
+  /* 版面 */
+  --gutter: 16px;
+  --dialog-max: 1080px;
+  --portrait-w: 230px;
+  --portrait-w-m: 84px;
+}
+
+:root[data-text-scale="1.15"] {
+  --text-scale: 1.15;
+}
+:root[data-text-scale="1.3"] {
+  --text-scale: 1.3;
+}

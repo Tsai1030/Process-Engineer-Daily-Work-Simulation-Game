@@ -1,3 +1,5 @@
+import '../ui/styles/tokens.css';
+import '../ui/styles/comic.css';
 import { content } from '../content';
 import { validateContent } from '../core/content_validator';
 import { createNewGame } from '../core/new_game';
