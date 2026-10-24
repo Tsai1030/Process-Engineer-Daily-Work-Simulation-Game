@@ -65,4 +65,10 @@ describe('resolveText', () => {
       new InvariantError('Unknown placeholder: text=t.test.bad placeholder={nmae}'),
     );
   });
+
+  test('a missing pronoun text key throws the unknown text error', () => {
+    const { 't.sys.pronoun.she': _removed, ...text } = content.text;
+    const ctx: EvalContext = { ...contextFor(PLAYER_NAME, 'she'), content: contentWith({ text }) };
+    expect(() => resolveText('t.test.pron', ctx)).toThrow(new InvariantError('Unknown text: text=t.sys.pronoun.she'));
+  });
 });
