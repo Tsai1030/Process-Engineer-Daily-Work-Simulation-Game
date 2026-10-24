@@ -19,7 +19,8 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check .",
-    "verify": "bun run typecheck && bun run check && bun test",
+    "validate-content": "bun run scripts/validate_content.ts",
+    "verify": "bun run typecheck && bun run check && bun run validate-content && bun test",
     "hooks:install": "git config core.hooksPath .githooks"
   },
   "dependencies": {

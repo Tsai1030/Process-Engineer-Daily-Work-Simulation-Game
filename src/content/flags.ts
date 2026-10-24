@@ -1,0 +1,63 @@
+import type { CounterId, FlagDef, FlagId } from '../model';
+
+// 02 §0.3 旗標表＋技術員轉職履歷的 flag.ex_operator（02 §1.2）
+export const flags = {
+  'flag.sys_hd30_fired': { description: '健康債門檻事件已觸發（只觸發一次）', scope: 'run' },
+  'flag.sys_hd60_fired': { description: '健康債門檻事件已觸發（只觸發一次）', scope: 'run' },
+  'flag.sys_hd85_fired': { description: '健康債門檻事件已觸發（只觸發一次）', scope: 'run' },
+  'flag.sys_stop_sequence_active': {
+    description: '「停下來」序列進行中；selectors.presentationMood 回傳 calm',
+    scope: 'run',
+  },
+  'flag.sys_leave_request_30': { description: '內容要求「休養 30 天／請假 2 週」', scope: 'keyDay' },
+  'flag.sys_leave_request_14': { description: '內容要求「休養 30 天／請假 2 週」', scope: 'keyDay' },
+  'flag.sys_end_day_requested': { description: '內容要求「今天到此為止，直接就寢」', scope: 'keyDay' },
+  'flag.sys_review_cap_m': { description: '下一次考績最高只到 M（GDD §13.3）', scope: 'run' },
+  'flag.sys_grade_upgrade_requested': { description: '申訴成功：最近一次考績升一級', scope: 'run' },
+  'flag.sys_pip_active': { description: 'PIP 進行中（快轉強制週分段）', scope: 'run' },
+  'flag.sys_written_warning': { description: '已收到書面警告', scope: 'run' },
+  'flag.sys_major_mistake_period': { description: '本考核期有重大失誤（考績直接 X）', scope: 'run' },
+  'flag.sys_lunch_skipped': { description: '今天沒吃午餐', scope: 'keyDay' },
+  'flag.sys_early_arrival': { description: '沒吃早餐，班中提早 10 分鐘開始', scope: 'keyDay' },
+  'flag.sys_blackout_today': { description: '今天已經「眼前一黑」過', scope: 'keyDay' },
+  'flag.sys_no_ring_tonight': { description: '今晚不擲 on-call 電話（病假、休養）', scope: 'keyDay' },
+  'flag.rookie_technician_tonight': {
+    description: '今晚是菜鳥技術員值班（沿用 01 §5.3.4 的 ID）',
+    scope: 'keyDay',
+  },
+  'flag.tonight_date_with_aan': { description: '今晚原本跟阿安有約（沿用 01 §8.5）', scope: 'keyDay' },
+  'flag.sys_bonded_help_azhe': { description: '該角色「生死之交」的一次救援已用掉（§8.4）', scope: 'run' },
+  'flag.sys_bonded_help_xiaoqing': { description: '該角色「生死之交」的一次救援已用掉（§8.4）', scope: 'run' },
+  'flag.sys_bonded_help_haoge': { description: '該角色「生死之交」的一次救援已用掉（§8.4）', scope: 'run' },
+  'flag.sys_bonded_help_meiling': { description: '該角色「生死之交」的一次救援已用掉（§8.4）', scope: 'run' },
+  'flag.sys_bonded_help_vivian': { description: '該角色「生死之交」的一次救援已用掉（§8.4）', scope: 'run' },
+  'flag.ex_operator': { description: '技術員轉職履歷', scope: 'run' },
+} satisfies Record<FlagId, FlagDef>;
+
+// 02 §0.3 計數器表
+export const counters = {
+  'cnt.sys_cleanroom_streak_min': '今天連續待在無塵室的遊戲分鐘',
+  'cnt.wip_pressure': 'WIP 壓力 0～100（§1.10）',
+  'cnt.sys_kpi_penalty': '本考核期 KPI 扣分（正數＝扣）',
+  'cnt.sys_ps_adjust': '本考核期 PS 事件修正（GDD §4.4「事件修正」）',
+  'cnt.sys_line_kpi_sum': '產線 KPI 的月取樣累計',
+  'cnt.sys_line_kpi_n': '產線 KPI 的月取樣累計',
+  'cnt.sys_grind_streak': '連續「拚」月數（可為小數：週 ＝ 0.25）',
+  'cnt.sys_exercise_bonus': '最大體力的運動加成（core 夾限 0～10）',
+  'cnt.sys_mind_zero_count': '「停下來」序列啟動次數',
+  'cnt.sys_leave_until_day': '休養期最後一天的 dayIndex；0 ＝ 沒有休養（休養不可能結束在第 0 天）',
+  'cnt.sys_last_care_month': '上次「身心警訊關心對話」的 yyyymm',
+  'cnt.sys_last_safety_prompt_month': '上次快轉安全提示的 yyyymm',
+  'cnt.sys_oncall_unanswered': 'on-call 沒接的累計次數（GDD §9.6）',
+  'cnt.sys_oncall_weeks_month': '本月輪值週數（發薪用）',
+  'cnt.sys_ff_nonstat_accum': '快轉中「非數值方針效果」的累積比例',
+  'cnt.sys_gowning_perfect_streak': '著裝連續全對次數',
+  'cnt.sys_save_policy_months': '「省」方針累計月數（E08）',
+  'cnt.sys_learning_gap_months': '連續沒有進修的月數（GDD §4.3「腳麻」）',
+  'cnt.sys_overtime_week_hours': '本週加班時數（完整版 60 小時警戒）',
+  'cnt.sys_major_violations': '重大違規次數（GDD §9.6）',
+  'cnt.sys_x_grades': '累積拿到 X 的次數',
+  'cnt.sys_borrow_month': '上次「跟家人借錢」事件的 yyyymm',
+  'cnt.sys_pip_weeks': 'PIP 已進行週數、失敗週數（§7.9）',
+  'cnt.sys_pip_fails': 'PIP 已進行週數、失敗週數（§7.9）',
+} satisfies Record<CounterId, string>;

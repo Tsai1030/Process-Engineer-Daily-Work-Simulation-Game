@@ -1,0 +1,32 @@
+import type { TextId } from '../../model';
+
+// 名字見 01 §8.3；職稱見 GDD §7.4 標題括號（D92）
+export const characterText = {
+  't.chr.lin.name': '林課長',
+  't.chr.lin.role': '蝕刻課課長，直屬主管',
+  't.chr.azhe.name': '阿哲',
+  't.chr.azhe.role': '資深工程師，OJT mentor',
+  't.chr.xiaoqing.name': '小晴',
+  't.chr.xiaoqing.role': '同期，PIE',
+  't.chr.haoge.name': '豪哥',
+  't.chr.haoge.role': '同期，EE；如果合租就是室友',
+  't.chr.meiling.name': '美玲姐',
+  't.chr.meiling.role': '資深技術員、夜班領班',
+  't.chr.vivian.name': 'Vivian',
+  't.chr.vivian.role': '資深工程師，林課長的愛將',
+  't.chr.shen.name': '沈部經理',
+  't.chr.shen.role': '製程部部經理',
+  't.chr.aan.name': '阿安',
+  't.chr.aan.role': '伴侶，國小老師',
+  't.chr.hr_he.name': '何佩珊',
+  't.chr.hr_he.role': '人資專員',
+  't.chr.mom.name': '媽媽',
+  't.chr.mom.role': '主角的媽媽',
+  't.chr.lao_k.name': '老K',
+  't.chr.lao_k.role': '穹晶學院新訓講師',
+  't.sys.bonded_help.azhe': '這次的鍋我先幫你扛了，欠我一頓宵夜。',
+  't.sys.bonded_help.xiaoqing': '我跟課長說那批是我先 hold 的，你先別出聲。',
+  't.sys.bonded_help.haoge': 'EE 那邊我幫你喬好了，這張單不會寫你的名字。',
+  't.sys.bonded_help.meiling': '這筆我在交接單上寫清楚了，不會算到你頭上。',
+  't.sys.bonded_help.vivian': '會議上我替你說話了，下次報告先給我看。',
+} satisfies Record<TextId, string>;
