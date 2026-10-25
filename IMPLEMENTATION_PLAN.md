@@ -19,7 +19,7 @@
     - (2) 暫定通過（待人工驗收）：並排校準 6 點 a 10、b 7、c 13、d 16、e 0、f 0（c 與 d 超門檻，見決定紀錄的校準第 5 輪）；§13.6 清單的人眼項目列於待人工驗收清單。
     - (3) 紅燈示範（Task 14）：`"detail": "core may not import package three", "file": "src/core/arch_probe.ts"`（`every import respects the layer rules of spec 01 section 4.2` FAIL）；刪除探測檔後 19 個測試全數 PASS。
 **Tests**：`rng`（參考值、往返、`int` 範圍）；`conditions`（參數化門檻、空 `all`／`any`、雙重否定）；`effects`（夾限、最大體力、人情溢出、修正器乘數、風向期 ×1.5、`chance` 恰好消耗一次 RNG）；`date`（`2027-06-13` → dayIndex 104、星期日；`2028-02-29` → 365）；`content_validator`（未知旗標、不可達節點、循環、孤兒台詞、負向 `skill`）；`selectors`（`machineStatus` 的 19／20／39／40 邊界、`maxStamina` 含「拚」−10）；`look`（`legacyToPhysical`、`selectLightRig`，04 §2.8）；`architecture` 全部規則；`props`（三角形預算）；整合 `palette_sync`。
-**Status**：Complete（暫定通過項目見待人工驗收清單）
+**Status**：Complete（2026-10-25 使用者人眼驗收通過）
 
 ### Stage 2：事件引擎與文字版關鍵日
 **Goal**：`step`、`session`、`flow`、`clock`、`event_scheduler`（含 `tagMultiplier`、`safety` 例外）、`event_runner`（含結果框表情、`favorWaived`）、`seeds`（小遊戲來源不重複）、`black_book`（02 §9.3 的雙排序）、`key_day_planner`（劇本關鍵日）、`thresholds`（`runThresholdMonitor` 的框架：歸零、健康債門檻、借錢排入；安全事件內容在 Stage 5）完成；UI 的 `dialogue_box`、`portrait`、`choice_cards`（鎖卡、門檻章、倒數）、`result_box`、`fx_layer`、`delta_pop`；內容：§8.5 範例一完整，加上序章 D1（#1 工號被消失）。班中時段先用 DOM 的 hotspot 清單代替 3D 走動（也就是 L4 的雛形）。
@@ -136,6 +136,6 @@
 
 | 項目 | 出處 | 代理量測的結果 | 需要誰 | 狀態 |
 |---|---|---|---|---|
-| Stage 1 並排校準（6 點取樣） | 01 §15 Stage 1、04 §2.4 | 方案 A 調 3 輪（半球光 10.8、平行光 2.8）＋第 5 輪地板重複改回 24 × 100：a 10、b 7、c 13、d 16（格線已對齊，剩邊緣濾波差；鄰近白磚 0）、e 0、f 0；c 超門檻 1、d 超門檻 4 但非光源差；方案 B 需改 render 程式碼未套用（試驗值更差）。截圖 `design/calibration/stage1_round5.png` | 使用者 | 暫定通過（待人工驗收） |
-| Stage 1 視覺一致性清單 | 01 §13.6 | 自動測試涵蓋：閃爍相位、紅燈錨點、光組選擇、預算；headless 量測：描邊、黃光區、天車、減少動態、390 px 版面、無 3D 通過；待人眼：頂／底面明暗、暗相染紅程度、「危」斜紋、three 的 3 行 console.error | 使用者 | 暫定通過（待人工驗收） |
-| 預設 bay 日間／夜間光組（範例沒有對照） | 04 §2.4、§3.2 | `bayDay`／`bayNight` 用公式換算值，無法並排；日間截圖 `design/calibration/stage1_bay_day.png` | 使用者（人眼看 `/`） | 待人工驗收 |
+| Stage 1 並排校準（6 點取樣） | 01 §15 Stage 1、04 §2.4 | 方案 A 調 3 輪（半球光 10.8、平行光 2.8）＋第 5 輪地板重複改回 24 × 100：a 10、b 7、c 13、d 16（格線已對齊，剩邊緣濾波差；鄰近白磚 0）、e 0、f 0；c 超門檻 1、d 超門檻 4 但非光源差；方案 B 需改 render 程式碼未套用（試驗值更差）。截圖 `design/calibration/stage1_round5.png` | 使用者 | 通過（2026-10-25 使用者人眼驗收） |
+| Stage 1 視覺一致性清單 | 01 §13.6 | 自動測試涵蓋：閃爍相位、紅燈錨點、光組選擇、預算；headless 量測：描邊、黃光區、天車、減少動態、390 px 版面、無 3D 通過；待人眼：頂／底面明暗、暗相染紅程度、「危」斜紋、three 的 3 行 console.error | 使用者 | 通過（2026-10-25 使用者人眼驗收） |
+| 預設 bay 日間／夜間光組（範例沒有對照） | 04 §2.4、§3.2 | `bayDay`／`bayNight` 用公式換算值，無法並排；日間截圖 `design/calibration/stage1_bay_day.png` | 使用者（人眼看 `/`） | 通過（2026-10-25 使用者人眼驗收） |
